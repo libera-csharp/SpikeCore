@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <UserSecretsId>aspnet-SpikeCore.Web-E201EA6B-FD51-4107-8B35-2258C27E66F3</UserSecretsId>
+    <TypeScriptToolsVersion>2.8</TypeScriptToolsVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.1.1" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.1" PrivateAssets="All" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SpikeCore.Data\SpikeCore.Data.csproj" />
+    <ProjectReference Include="..\SpikeCore.Irc.IrcDotNet\SpikeCore.Irc.IrcDotNet.csproj" />
+    <ProjectReference Include="..\SpikeCore.Irc\SpikeCore.Irc.csproj" />
+    <ProjectReference Include="..\SpikeCore\SpikeCore.csproj" />
+  </ItemGroup>
+
+</Project>

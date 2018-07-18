@@ -1,0 +1,7 @@
+language: csharp
+mono: none
+dotnet: 2.1.301
+script:
+  - cd src/SpikeCore
+  - dotnet restore
+  - dotnet build -c Release

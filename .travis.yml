@@ -13,6 +13,7 @@ script:
 - cd ../..
 
 deploy:
+  skip_cleanup: true
   provider: script
   script: bash ./docker_publish.sh
   on:

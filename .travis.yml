@@ -1,8 +1,21 @@
 language: csharp
 mono: none
 dotnet: 2.1.301
+
 script:
-  - cd src/SpikeCore
-  - dotnet restore
-  - dotnet build -c Release
-  - dotnet publish -c Release
+- cd src/SpikeCore
+- dotnet restore
+- dotnet build -c Release
+- dotnet publish -c Release
+- cd ../..
+
+deploy:
+  provider: script
+  script: bash ./docker_publish.sh
+  on:
+    branch: master
+
+env:
+  global:
+  - secure: Sj1mLSWwvU1IKGa61HSd9S1bAbf3ZSYcjadRocSn0iYYWu/HpgsuuKCVkMnOXHGrRZqG+mCHxreLFbj8UDNCT8Oo1RJxMxj7jednOEfqfrRS0MTY4YtjMtaTqEhLZVQR3tLhuMG6X5HT8fDeWOiS9KLYz9MwzPDm3TSxCfeRFUnt640HwPvsgJ4Rxe02SHsVXpTip6M7ZS45PHZKrsb7XXyYSXKJGX8xtgz4Ac09zZlQhioBDxnLyt8NlupnWdzpuHhQCklcOCQ2LTEN4++SoSBm1ZatUJ0EWJ7yacNyUFl91wMMAk4gKPdXhED8DLbXCb1v/+FVAaofxIPTrsBLK94qIi87LcIsa8VEqowoj1VAJlKm4pDyiyrRDJHRLjPoABDtVsNThmteJFYUw9UoraxLzZgMRIsEpp/Cprxebf2vXV1Y06kl5wuPBaqHA4pGzi2XsrVKP0nbqJF3JNiU/yy4GoMFleWmnCG/mLrI4hNZQC0eSwmhWz98u4+gsHJFyjMZgSKg9InHvXeF1Gxs312G5c8Ok68aIGFznt7P7Lph6XYDap0PpL/9iG6nmgd/9IXRuzm2pf0YB0QCebr4bpEgMrXzvUw+cAPjNohCEokf1fV9jeO/yx6KzaDHezDpoJVpsHirXMM7OXuo6LWLFUlSICVtOF/It+4Kxos/O6c=
+  - secure: mzDuorzM3UBVk2leRZbraQy+lubYedpXJ9OW9LBKsOv9bNYr8jZMfbWQmk1Dnkzauk1uosdxl8ZTzHIuW/hB/g5Nd5u7FvVs6nkeQxqHGJFXU3DGd5EpcVfUlBTDBL7lpDIaKF552UAowjeHILBmYjxGN3bO5BngqaO8vVbkEQJPrm0GWWJO5ObEqJv9uhRHdo8P9eo4j1QQqzJPtKJsT6unzsb0zgCamv3bAl9M65VI4inPW/BAhS4HfcKFcBiosF+sareb/yIcHltAHK3XUy+p9yRbToTlWwjIQMmiSQRv9Q/T1rtCYU9Z1HPVMT8dnVz+ua5Vjc3DQncMKbh0DOkLge1ry7I4Ml7nURfS+r0zkAZoIXOXUGrN4d0PUSx/wOo3Jb5/wRPUziv5RV+15Vqu2JwzFBtrfpwSqm69U2vpksTvwb1XzUUo0KYPZIt3SJ0tloX8YFTvne+24/C7zQ1pnGFDdjixo8ogwdGvo7xFZzBh2vgSYC6Cv/1OlIwkOZQlauCGTe54/Oe88mvydfVaPJhR1fMGzQAouLT/krBIlJRMjhIQ7FpPOBRwpOf1sqP+W0rL7VBxiImC86T9q6K6pVH6MWd/VCk+G0WZqMXYM580qejL1JDJLm80J1fExE/kL+298guISOL20uQ1ygAiokPA6xA1Ns1gDOzqZ5c=

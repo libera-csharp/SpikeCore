@@ -1,6 +1,5 @@
 ﻿using System;
-
-using SpikeCore.Web.Irc;
+using SpikeCore.Irc;
 
 namespace SpikeCore
 {
@@ -11,25 +10,27 @@ namespace SpikeCore
         private readonly object ircClientLock = new object();
         private IIrcClient ircClient;
 
-        private Action<string> messageRecieved;
+        private Action<string> messageReceived;
 
-        public Action<string> MessageRecieved
+        public Action<string> MessageReceived
         {
             get
             {
                 lock (ircClientLock)
                 {
-                    return messageRecieved;
+                    return messageReceived;
                 }
             }
             set
             {
                 lock (ircClientLock)
                 {
-                    messageRecieved = value;
+                    messageReceived = value;
 
                     if (ircClient != null)
-                        ircClient.MessageRecieved = value;
+                    {
+                        ircClient.MessageReceived = value;   
+                    }
                 }
             }
         }
@@ -46,7 +47,7 @@ namespace SpikeCore
                 if (ircClient == null)
                 {
                     ircClient = serviceProvider.GetService(typeof(IIrcClient)) as IIrcClient;
-                    ircClient.MessageRecieved = messageRecieved;
+                    ircClient.MessageReceived = messageReceived;
                     ircClient.Connect();
                 }
             }

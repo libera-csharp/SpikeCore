@@ -8,10 +8,10 @@ using Microsoft.Extensions.DependencyInjection;
 
 using SpikeCore.Data;
 using SpikeCore.Data.Models;
+using SpikeCore.Irc;
 using SpikeCore.Irc.IrcDotNet;
 using SpikeCore.Web.Configuration;
 using SpikeCore.Web.Hubs;
-using SpikeCore.Web.Irc;
 using SpikeCore.Web.Services;
 
 namespace SpikeCore.Web

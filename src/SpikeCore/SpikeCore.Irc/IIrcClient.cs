@@ -1,10 +1,10 @@
 ﻿using System;
 
-namespace SpikeCore.Web.Irc
+namespace SpikeCore.Irc
 {
     public interface IIrcClient
     {
-        Action<string> MessageRecieved { get; set; }
+        Action<string> MessageReceived { get; set; }
 
         void Connect();
         void SendMessage(string message);

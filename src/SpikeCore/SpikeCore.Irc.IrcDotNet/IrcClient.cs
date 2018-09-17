@@ -2,15 +2,13 @@
 
 using IrcDotNet;
 
-using SpikeCore.Web.Irc;
-
 namespace SpikeCore.Irc.IrcDotNet
 {
     public class IrcClient : IIrcClient
     {
         private StandardIrcClient ircClient;
 
-        public Action<string> MessageRecieved { get; set; }
+        public Action<string> MessageReceived { get; set; }
 
         public void Connect()
         {
@@ -34,9 +32,9 @@ namespace SpikeCore.Irc.IrcDotNet
             ircClient.Channels.Join("#spikelite");
         }
 
-        private void LocalUser_MessageReceived(object sender, IrcMessageEventArgs e) => MessageRecieved?.Invoke($"{e.Source.Name}: {e.Targets}: {e.Text}");
-        private void IrcClient_ConnectFailed(object sender, IrcErrorEventArgs e) => MessageRecieved?.Invoke($"IrcClient_ConnectFailed: {e.Error.Message}");
-        private void IrcClient_RawMessageReceived(object sender, IrcRawMessageEventArgs e) => MessageRecieved?.Invoke($"RAW: {e.RawContent}");
+        private void LocalUser_MessageReceived(object sender, IrcMessageEventArgs e) => MessageReceived?.Invoke($"{e.Source.Name}: {e.Targets}: {e.Text}");
+        private void IrcClient_ConnectFailed(object sender, IrcErrorEventArgs e) => MessageReceived?.Invoke($"IrcClient_ConnectFailed: {e.Error.Message}");
+        private void IrcClient_RawMessageReceived(object sender, IrcRawMessageEventArgs e) => MessageReceived?.Invoke($"RAW: {e.RawContent}");
         public void SendMessage(string message) => ircClient.LocalUser.SendMessage("#spikelite", message);
     }
 }

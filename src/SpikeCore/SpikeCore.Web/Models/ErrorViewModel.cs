@@ -1,5 +1,3 @@
-using System;
-
 namespace SpikeCore.Web.Models
 {
     public class ErrorViewModel

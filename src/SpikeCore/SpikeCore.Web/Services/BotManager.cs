@@ -12,7 +12,7 @@ namespace SpikeCore.Web.Services
         private readonly IHubContext<TestHub> hubContext;
 
         private readonly object botLock = new object();
-        private IBot bot = null;
+        private IBot bot;
 
         public BotManager(IServiceProvider serviceProvider, IHubContext<TestHub> hubContext)
         {
@@ -27,7 +27,7 @@ namespace SpikeCore.Web.Services
                 if (bot == null)
                 {
                     bot = serviceProvider.GetService(typeof(IBot)) as IBot;
-                    bot.MessageRecieved = (message) => hubContext.Clients.All.SendAsync("ReceiveMessage", message).Wait();
+                    bot.MessageReceived = (message) => hubContext.Clients.All.SendAsync("ReceiveMessage", message).Wait();
                     bot.Connect();
                 }
             }

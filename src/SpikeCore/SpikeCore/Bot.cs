@@ -5,31 +5,29 @@ namespace SpikeCore
 {
     public class Bot : IBot
     {
-        private readonly IServiceProvider serviceProvider;
-
-        private readonly object ircClientLock = new object();
-        private IIrcClient ircClient;
-
-        private Action<string> messageReceived;
+        private readonly IServiceProvider _serviceProvider;
+        private readonly object _ircClientLock = new object();
+        private IIrcClient _ircClient;
+        private Action<string> _messageReceived;
 
         public Action<string> MessageReceived
         {
             get
             {
-                lock (ircClientLock)
+                lock (_ircClientLock)
                 {
-                    return messageReceived;
+                    return _messageReceived;
                 }
             }
             set
             {
-                lock (ircClientLock)
+                lock (_ircClientLock)
                 {
-                    messageReceived = value;
+                    _messageReceived = value;
 
-                    if (ircClient != null)
+                    if (_ircClient != null)
                     {
-                        ircClient.MessageReceived = value;   
+                        _ircClient.MessageReceived = value;   
                     }
                 }
             }
@@ -37,25 +35,25 @@ namespace SpikeCore
 
         public Bot(IServiceProvider serviceProvider)
         {
-            this.serviceProvider = serviceProvider;
+            _serviceProvider = serviceProvider;
         }
 
         public void Connect()
         {
-            lock (ircClientLock)
+            lock (_ircClientLock)
             {
-                if (ircClient == null)
+                if (_ircClient == null)
                 {
-                    ircClient = serviceProvider.GetService(typeof(IIrcClient)) as IIrcClient;
-                    ircClient.MessageReceived = messageReceived;
-                    ircClient.Connect();
+                    _ircClient = _serviceProvider.GetService(typeof(IIrcClient)) as IIrcClient;
+                    _ircClient.MessageReceived = _messageReceived;
+                    _ircClient.Connect();
                 }
             }
         }
 
         public void SendMessage(string message)
         {
-            ircClient.SendMessage(message);
+            _ircClient.SendMessage(message);
         }
     }
 }

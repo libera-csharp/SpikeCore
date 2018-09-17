@@ -8,34 +8,33 @@ namespace SpikeCore.Web.Services
 {
     public class BotManager : IBotManager
     {
-        private readonly IServiceProvider serviceProvider;
-        private readonly IHubContext<TestHub> hubContext;
-
-        private readonly object botLock = new object();
-        private IBot bot;
+        private readonly IServiceProvider _serviceProvider;
+        private readonly IHubContext<TestHub> _hubContext;
+        private readonly object _botLock = new object();
+        private IBot _bot;
 
         public BotManager(IServiceProvider serviceProvider, IHubContext<TestHub> hubContext)
         {
-            this.serviceProvider = serviceProvider;
-            this.hubContext = hubContext;
+            _serviceProvider = serviceProvider;
+            _hubContext = hubContext;
         }
 
         public void Connect()
         {
-            lock (botLock)
+            lock (_botLock)
             {
-                if (bot == null)
+                if (_bot == null)
                 {
-                    bot = serviceProvider.GetService(typeof(IBot)) as IBot;
-                    bot.MessageReceived = (message) => hubContext.Clients.All.SendAsync("ReceiveMessage", message).Wait();
-                    bot.Connect();
+                    _bot = _serviceProvider.GetService(typeof(IBot)) as IBot;
+                    _bot.MessageReceived = (message) => _hubContext.Clients.All.SendAsync("ReceiveMessage", message).Wait();
+                    _bot.Connect();
                 }
             }
         }
 
         public void SendMessage(string message)
         {
-            bot.SendMessage(message);
+            _bot.SendMessage(message);
         }
     }
 }

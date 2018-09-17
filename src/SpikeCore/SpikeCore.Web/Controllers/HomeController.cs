@@ -11,11 +11,11 @@ namespace SpikeCore.Web.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly UserManager<SpikeCoreUser> userManager;
+        private readonly UserManager<SpikeCoreUser> _userManager;
 
         public HomeController(UserManager<SpikeCoreUser> userManager)
         {
-            this.userManager = userManager;
+            _userManager = userManager;
         }
 
         public IActionResult Index()
@@ -26,7 +26,7 @@ namespace SpikeCore.Web.Controllers
         public async Task<IActionResult> CreateUser()
         {
             var user = new SpikeCoreUser { UserName = "spikecore@example.com", Email = "spikecore@example.com" };
-            var result = await userManager.CreateAsync(user, "spikecore");
+            await _userManager.CreateAsync(user, "spikecore");
 
             return Content("UN: spikecore@example.com   PW: spikecore");
         }

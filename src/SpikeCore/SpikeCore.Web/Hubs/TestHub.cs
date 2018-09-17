@@ -8,21 +8,21 @@ namespace SpikeCore.Web.Hubs
 {
     public class TestHub : Hub
     {
-        private readonly IBotManager botManager;
+        private readonly IBotManager _botManager;
 
         public TestHub(IBotManager botManager)
         {
-            this.botManager = botManager;
+            _botManager = botManager;
         }
 
         public async Task Connect()
         {
-            this.botManager.Connect();
+            _botManager.Connect();
         }
 
         public async Task SendMessage(string message)
         {
-            this.botManager.SendMessage(message);
+            _botManager.SendMessage(message);
             //await Clients.All.SendAsync("ReceiveMessage", message);
         }
     }

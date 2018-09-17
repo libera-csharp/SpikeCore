@@ -65,6 +65,8 @@ namespace SpikeCore.Web
             services.AddTransient<IIrcClient, IrcClient>();
             services.AddTransient<IBot, Bot>();
             services.AddSingleton<IBotManager, BotManager>();
+            
+            services.AddSingleton(Configuration);
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)

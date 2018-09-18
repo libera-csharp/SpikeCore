@@ -20,6 +20,8 @@ namespace SpikeCore.Web
 
             Console.CancelKeyPress += (sender, eventArgs) =>
             {
+                eventArgs.Cancel = true;
+
                 cancellationTokenSource.Cancel();
 
                 Console.WriteLine("Stopping.");
@@ -29,6 +31,8 @@ namespace SpikeCore.Web
             Console.WriteLine("CTRL-C to stop.");
             
             await webHost.RunAsync(cancellationTokenSource.Token);
+
+            Console.WriteLine("Stopped.");
         }
     }
 }

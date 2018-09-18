@@ -29,7 +29,7 @@ namespace SpikeCore.Web
 
             Console.WriteLine("Running.");
             Console.WriteLine("CTRL-C to stop.");
-            
+
             await webHost.RunAsync(cancellationTokenSource.Token);
 
             Console.WriteLine("Stopped.");

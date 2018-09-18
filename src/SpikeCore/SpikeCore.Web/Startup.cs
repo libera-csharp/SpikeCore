@@ -11,6 +11,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
+using Rebus.Config;
+using Rebus.Transport.InMem;
+
 using SpikeCore.Data;
 using SpikeCore.Data.Models;
 using SpikeCore.Irc;
@@ -76,6 +79,12 @@ namespace SpikeCore.Web
 
             var containerBuilder = new ContainerBuilder();
             containerBuilder.Populate(services);
+
+            containerBuilder
+                .RegisterRebus((configurer, context) =>
+                    configurer
+                        .Transport(t => t.UseInMemoryTransport(new InMemNetwork(), "SpikeBus"))
+                );
 
             this.ApplicationContainer = containerBuilder.Build();
 

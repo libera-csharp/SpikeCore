@@ -4,6 +4,11 @@ using System.Threading.Tasks;
 
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+
+using Rebus.Activation;
+using Rebus.Config;
+using Rebus.Transport.InMem;
 
 namespace SpikeCore.Web
 {
@@ -11,28 +16,37 @@ namespace SpikeCore.Web
     {
         public static async Task Main(string[] args)
         {
-            var webHost = WebHost
-                .CreateDefaultBuilder(args)
-                .UseStartup<Startup>()
-                .Build();
-
-            var cancellationTokenSource = new CancellationTokenSource();
-
-            Console.CancelKeyPress += (sender, eventArgs) =>
+            using (var activator = new BuiltinHandlerActivator())
             {
-                eventArgs.Cancel = true;
+                var rebusBus = Configure
+                    .With(activator)
+                    .Transport(t => t.UseInMemoryTransport(new InMemNetwork(), "SpikeBus"))
+                    .Start();
 
-                cancellationTokenSource.Cancel();
+                var webHost = WebHost
+                    .CreateDefaultBuilder(args)
+                    .ConfigureServices(servicesCollection => servicesCollection.AddSingleton(rebusBus))
+                    .UseStartup<Startup>()
+                    .Build();
 
-                Console.WriteLine("Stopping.");
-            };
+                var cancellationTokenSource = new CancellationTokenSource();
 
-            Console.WriteLine("Running.");
-            Console.WriteLine("CTRL-C to stop.");
-            
-            await webHost.RunAsync(cancellationTokenSource.Token);
+                Console.CancelKeyPress += (sender, eventArgs) =>
+                {
+                    eventArgs.Cancel = true;
 
-            Console.WriteLine("Stopped.");
+                    cancellationTokenSource.Cancel();
+
+                    Console.WriteLine("Stopping.");
+                };
+
+                Console.WriteLine("Running.");
+                Console.WriteLine("CTRL-C to stop.");
+
+                await webHost.RunAsync(cancellationTokenSource.Token);
+
+                Console.WriteLine("Stopped.");
+            }
         }
     }
 }

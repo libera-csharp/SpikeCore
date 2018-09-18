@@ -15,7 +15,7 @@ namespace SpikeCore.Web.Hubs
             _botManager = botManager;
         }
 
-        public async Task Connect()
+        public void Connect()
         {
             _botManager.Connect();
         }
@@ -23,7 +23,7 @@ namespace SpikeCore.Web.Hubs
         public async Task SendMessage(string message)
         {
             _botManager.SendMessage(message);
-            //await Clients.All.SendAsync("ReceiveMessage", message);
+            await Clients.All.SendAsync("ReceiveMessage", "[Sent from Web UI]: " + message);
         }
     }
 }

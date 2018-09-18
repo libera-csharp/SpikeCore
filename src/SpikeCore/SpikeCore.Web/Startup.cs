@@ -1,4 +1,9 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System;
+
+using Autofac;
+using Autofac.Extensions.DependencyInjection;
+
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -18,6 +23,7 @@ namespace SpikeCore.Web
 {
     public class Startup
     {
+        public IContainer ApplicationContainer { get; private set; }
         private IConfiguration Configuration { get; }
         private WebConfig WebConfig { get; } = new WebConfig();
 
@@ -27,7 +33,7 @@ namespace SpikeCore.Web
             Configuration.GetSection("Web").Bind(WebConfig);
         }
 
-        public void ConfigureServices(IServiceCollection services)
+        public IServiceProvider ConfigureServices(IServiceCollection services)
         {
             if (WebConfig.Enabled)
             {
@@ -39,6 +45,8 @@ namespace SpikeCore.Web
                     options.MinimumSameSitePolicy = SameSiteMode.None;
                 });
             }
+
+            services.AddSingleton<IConfiguration>(Configuration);
 
             services.AddDbContext<SpikeCoreDbContext>(options =>
             {
@@ -65,8 +73,13 @@ namespace SpikeCore.Web
             services.AddTransient<IIrcClient, IrcClient>();
             services.AddTransient<IBot, Bot>();
             services.AddSingleton<IBotManager, BotManager>();
-            
-            services.AddSingleton(Configuration);
+
+            var containerBuilder = new ContainerBuilder();
+            containerBuilder.Populate(services);
+
+            this.ApplicationContainer = containerBuilder.Build();
+
+            return new AutofacServiceProvider(this.ApplicationContainer);
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)

@@ -38,6 +38,8 @@ namespace SpikeCore.Web
 
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
+            var containerBuilder = new ContainerBuilder();
+            
             if (WebConfig.Enabled)
             {
                 services.AddSignalR();
@@ -72,14 +74,25 @@ namespace SpikeCore.Web
             }
 
             var botConfig = new BotConfig(); 
-            Configuration.GetSection("Bot").Bind(botConfig);           
-          
-            services.AddSingleton<IIrcClient, IrcClient>();
-            services.AddSingleton<IBot, Bot>();
-            services.AddSingleton<IBotManager, BotManager>();
-            services.AddSingleton(botConfig);
+            Configuration.GetSection("Bot").Bind(botConfig);
 
-            var containerBuilder = new ContainerBuilder();
+            containerBuilder
+                .RegisterType<IrcClient>()
+                .As<IIrcClient>()
+                .SingleInstance();
+            
+            containerBuilder
+                .RegisterType<Bot>()
+                .As<IBot>()
+                .SingleInstance();
+            
+            containerBuilder
+                .RegisterType<BotManager>()
+                .As<IBotManager>()
+                .SingleInstance();
+            
+            containerBuilder.RegisterInstance(botConfig);
+
             containerBuilder.Populate(services);
 
             containerBuilder

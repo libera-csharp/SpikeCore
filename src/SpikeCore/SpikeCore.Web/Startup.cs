@@ -17,6 +17,7 @@ using Rebus.Transport.InMem;
 using SpikeCore.Data;
 using SpikeCore.Data.Models;
 using SpikeCore.Irc;
+using SpikeCore.Irc.Configuration;
 using SpikeCore.Irc.IrcDotNet;
 using SpikeCore.Web.Configuration;
 using SpikeCore.Web.Hubs;
@@ -26,7 +27,6 @@ namespace SpikeCore.Web
 {
     public class Startup
     {
-        public IContainer ApplicationContainer { get; private set; }
         private IConfiguration Configuration { get; }
         private WebConfig WebConfig { get; } = new WebConfig();
 
@@ -38,6 +38,8 @@ namespace SpikeCore.Web
 
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
+            var containerBuilder = new ContainerBuilder();
+            
             if (WebConfig.Enabled)
             {
                 services.AddSignalR();
@@ -48,8 +50,6 @@ namespace SpikeCore.Web
                     options.MinimumSameSitePolicy = SameSiteMode.None;
                 });
             }
-
-            services.AddSingleton<IConfiguration>(Configuration);
 
             services.AddDbContext<SpikeCoreDbContext>(options =>
             {
@@ -73,11 +73,26 @@ namespace SpikeCore.Web
                     .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             }
 
-            services.AddTransient<IIrcClient, IrcClient>();
-            services.AddTransient<IBot, Bot>();
-            services.AddSingleton<IBotManager, BotManager>();
+            var botConfig = new BotConfig(); 
+            Configuration.GetSection("Bot").Bind(botConfig);
 
-            var containerBuilder = new ContainerBuilder();
+            containerBuilder
+                .RegisterType<IrcClient>()
+                .As<IIrcClient>()
+                .SingleInstance();
+            
+            containerBuilder
+                .RegisterType<Bot>()
+                .As<IBot>()
+                .SingleInstance();
+            
+            containerBuilder
+                .RegisterType<BotManager>()
+                .As<IBotManager>()
+                .SingleInstance();
+            
+            containerBuilder.RegisterInstance(botConfig);
+
             containerBuilder.Populate(services);
 
             containerBuilder
@@ -86,9 +101,7 @@ namespace SpikeCore.Web
                         .Transport(t => t.UseInMemoryTransport(new InMemNetwork(), "SpikeBus"))
                 );
 
-            this.ApplicationContainer = containerBuilder.Build();
-
-            return new AutofacServiceProvider(this.ApplicationContainer);
+            return new AutofacServiceProvider(containerBuilder.Build());
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)

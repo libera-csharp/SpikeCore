@@ -1,17 +1,13 @@
 ﻿using System;
-using Microsoft.Extensions.Configuration;
 using SpikeCore.Irc;
-using SpikeCore.Irc.Configuration;
 
 namespace SpikeCore
 {
     public class Bot : IBot
     {
-        private readonly IServiceProvider _serviceProvider;
+        private readonly IIrcClient _ircClient;
         private readonly object _ircClientLock = new object();
-        private readonly BotConfig _botConfig = new BotConfig();
         
-        private IIrcClient _ircClient;
         private Action<string> _messageReceived;
 
         public Action<string> MessageReceived
@@ -37,24 +33,15 @@ namespace SpikeCore
             }
         }
 
-        public Bot(IServiceProvider serviceProvider, IConfiguration configuration)
+        public Bot(IIrcClient ircClient)
         {
-            _serviceProvider = serviceProvider;
-            configuration.GetSection("Bot").Bind(_botConfig);
+            _ircClient = ircClient;
         }
 
         public void Connect()
-        {
-            lock (_ircClientLock)
-            {
-                if (_ircClient == null)
-                {
-                    _ircClient = _serviceProvider.GetService(typeof(IIrcClient)) as IIrcClient;
-                    
-                    _ircClient.MessageReceived = _messageReceived;
-                    _ircClient.Connect(_botConfig);
-                }
-            }
+        {                 
+            _ircClient.MessageReceived = _messageReceived;
+            _ircClient.Connect();
         }
 
         public void SendMessage(string message)

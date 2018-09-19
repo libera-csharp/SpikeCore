@@ -1,5 +1,4 @@
 ﻿using System;
-using SpikeCore.Irc.Configuration;
 
 namespace SpikeCore.Irc
 {
@@ -7,7 +6,7 @@ namespace SpikeCore.Irc
     {
         Action<string> MessageReceived { get; set; }
 
-        void Connect(BotConfig botConfig);
+        void Connect();
         void SendMessage(string message);
     }
 }

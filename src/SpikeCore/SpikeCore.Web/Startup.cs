@@ -17,6 +17,7 @@ using Rebus.Transport.InMem;
 using SpikeCore.Data;
 using SpikeCore.Data.Models;
 using SpikeCore.Irc;
+using SpikeCore.Irc.Configuration;
 using SpikeCore.Irc.IrcDotNet;
 using SpikeCore.Web.Configuration;
 using SpikeCore.Web.Hubs;
@@ -26,7 +27,6 @@ namespace SpikeCore.Web
 {
     public class Startup
     {
-        public IContainer ApplicationContainer { get; private set; }
         private IConfiguration Configuration { get; }
         private WebConfig WebConfig { get; } = new WebConfig();
 
@@ -48,8 +48,6 @@ namespace SpikeCore.Web
                     options.MinimumSameSitePolicy = SameSiteMode.None;
                 });
             }
-
-            services.AddSingleton<IConfiguration>(Configuration);
 
             services.AddDbContext<SpikeCoreDbContext>(options =>
             {
@@ -73,9 +71,13 @@ namespace SpikeCore.Web
                     .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             }
 
-            services.AddTransient<IIrcClient, IrcClient>();
-            services.AddTransient<IBot, Bot>();
+            var botConfig = new BotConfig(); 
+            Configuration.GetSection("Bot").Bind(botConfig);           
+          
+            services.AddSingleton<IIrcClient, IrcClient>();
+            services.AddSingleton<IBot, Bot>();
             services.AddSingleton<IBotManager, BotManager>();
+            services.AddSingleton(botConfig);
 
             var containerBuilder = new ContainerBuilder();
             containerBuilder.Populate(services);
@@ -86,9 +88,7 @@ namespace SpikeCore.Web
                         .Transport(t => t.UseInMemoryTransport(new InMemNetwork(), "SpikeBus"))
                 );
 
-            this.ApplicationContainer = containerBuilder.Build();
-
-            return new AutofacServiceProvider(this.ApplicationContainer);
+            return new AutofacServiceProvider(containerBuilder.Build());
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)

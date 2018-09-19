@@ -7,15 +7,18 @@ namespace SpikeCore.Irc.IrcDotNet
 {
     public class IrcClient : IIrcClient
     {
+        private readonly BotConfig _botConfig;
         private StandardIrcClient _ircClient;
-        private BotConfig _botConfig;
         
         public Action<string> MessageReceived { get; set; }
 
-        public void Connect(BotConfig botConfig)
+        public IrcClient(BotConfig botConfig)
         {
             _botConfig = botConfig;
-            
+        }
+        
+        public void Connect()
+        {            
             _ircClient = new StandardIrcClient();
             _ircClient.RawMessageReceived += IrcClient_RawMessageReceived;
 

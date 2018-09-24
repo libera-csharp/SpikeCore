@@ -2,7 +2,7 @@
 
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
-
+using Foundatio.Messaging;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -69,25 +69,31 @@ namespace SpikeCore.Web
                     .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             }
 
-            var botConfig = new BotConfig(); 
+            var botConfig = new BotConfig();
             Configuration.GetSection("Bot").Bind(botConfig);
+            containerBuilder.RegisterInstance(botConfig);
 
             containerBuilder
-                .RegisterType<IrcClient>()
-                .As<IIrcClient>()
+                .RegisterType<InMemoryMessageBus>()
+                .As<IMessageBus>()
                 .SingleInstance();
             
+            // Auto-Activate our Bot instance: this isn't injected anywhere, so if we forget to do this, we're in trouble.
             containerBuilder
                 .RegisterType<Bot>()
                 .As<IBot>()
-                .SingleInstance();
+                .SingleInstance()
+                .AutoActivate();
+            
+            containerBuilder
+                .RegisterType<IrcClient>()
+                .As<IIrcClient>()
+                .SingleInstance();           
             
             containerBuilder
                 .RegisterType<BotManager>()
                 .As<IBotManager>()
                 .SingleInstance();
-            
-            containerBuilder.RegisterInstance(botConfig);
 
             containerBuilder.Populate(services);
 

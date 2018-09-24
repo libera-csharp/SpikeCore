@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpikeCore.Data", "SpikeCore
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpikeCore", "SpikeCore\SpikeCore.csproj", "{FC68C5CA-7182-4724-8916-6636CEB66A59}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpikeCore.Messages", "SpikeCore.Messages\SpikeCore.Messages\SpikeCore.Messages.csproj", "{008CCA3B-EED1-4948-AE72-448A2473A30A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{FC68C5CA-7182-4724-8916-6636CEB66A59}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FC68C5CA-7182-4724-8916-6636CEB66A59}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FC68C5CA-7182-4724-8916-6636CEB66A59}.Release|Any CPU.Build.0 = Release|Any CPU
+		{008CCA3B-EED1-4948-AE72-448A2473A30A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{008CCA3B-EED1-4948-AE72-448A2473A30A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{008CCA3B-EED1-4948-AE72-448A2473A30A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{008CCA3B-EED1-4948-AE72-448A2473A30A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

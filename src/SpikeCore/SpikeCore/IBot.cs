@@ -1,12 +1,7 @@
-﻿using System;
-
-namespace SpikeCore
+﻿namespace SpikeCore
 {
     public interface IBot
     {
-        Action<string> MessageReceived { get; set; }
-
-        void Connect();
-        void SendMessage(string message);
+        // This is an empty marker interface for now.
     }
 }

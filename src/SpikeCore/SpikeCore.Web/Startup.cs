@@ -10,10 +10,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-
-using Rebus.Config;
-using Rebus.Transport.InMem;
-
 using SpikeCore.Data;
 using SpikeCore.Data.Models;
 using SpikeCore.Irc;
@@ -94,12 +90,6 @@ namespace SpikeCore.Web
             containerBuilder.RegisterInstance(botConfig);
 
             containerBuilder.Populate(services);
-
-            containerBuilder
-                .RegisterRebus((configurer, context) =>
-                    configurer
-                        .Transport(t => t.UseInMemoryTransport(new InMemNetwork(), "SpikeBus"))
-                );
 
             return new AutofacServiceProvider(containerBuilder.Build());
         }

@@ -6,9 +6,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SpikeCore.Irc\SpikeCore.Irc.csproj" />
+    <ProjectReference Include="..\SpikeCore.Messages\SpikeCore.Messages\SpikeCore.Messages.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Foundatio" Version="7.0.1738" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="2.1.1" />
   </ItemGroup>
 </Project>

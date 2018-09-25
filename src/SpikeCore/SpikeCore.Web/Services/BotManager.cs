@@ -1,31 +1,22 @@
-﻿using System;
-
+﻿using System.Threading.Tasks;
+using Foundatio.Messaging;
 using Microsoft.AspNetCore.SignalR;
-
+using SpikeCore.Messages;
 using SpikeCore.Web.Hubs;
 
 namespace SpikeCore.Web.Services
 {
     public class BotManager : IBotManager
     {
-        private readonly IBot _bot;
-        private readonly IHubContext<TestHub> _hubContext;
+        private readonly IMessageBus _messageBus;
 
-        public BotManager(IBot bot, IHubContext<TestHub> hubContext)
+        public BotManager(IHubContext<TestHub> hubContext, IMessageBus messageBus)
         {
-            _bot = bot;
-            _hubContext = hubContext;
+            _messageBus = messageBus;
+            _messageBus.SubscribeAsync<IrcReceiveMessage>(message => hubContext.Clients.All.SendAsync("ReceiveMessage", message.Message));
         }
 
-        public void Connect()
-        {
-            _bot.MessageReceived = (message) => _hubContext.Clients.All.SendAsync("ReceiveMessage", message).Wait();
-            _bot.Connect();
-        }
-
-        public void SendMessage(string message)
-        {
-            _bot.SendMessage(message);
-        }
+        public async Task ConnectAsync() => await _messageBus.PublishAsync(new IrcConnectMessage());
+        public async Task SendMessageAsync(string message) => await _messageBus.PublishAsync(new IrcSendMessage(message));
     }
 }

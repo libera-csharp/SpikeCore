@@ -1,8 +1,10 @@
-﻿namespace SpikeCore.Web.Services
+﻿using System.Threading.Tasks;
+
+namespace SpikeCore.Web.Services
 {
     public interface IBotManager
     {
-        void Connect();
-        void SendMessage(string message);
+        Task ConnectAsync();
+        Task SendMessageAsync(string message);
     }
 }

@@ -2,7 +2,7 @@
 
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using Foundatio.Messaging;
+
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -10,11 +10,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+
 using SpikeCore.Data;
 using SpikeCore.Data.Models;
 using SpikeCore.Irc;
 using SpikeCore.Irc.Configuration;
 using SpikeCore.Irc.IrcDotNet;
+using SpikeCore.Web.AutofacFoundatio;
 using SpikeCore.Web.Configuration;
 using SpikeCore.Web.Hubs;
 using SpikeCore.Web.Services;
@@ -34,8 +36,6 @@ namespace SpikeCore.Web
 
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
-            var containerBuilder = new ContainerBuilder();
-            
             if (WebConfig.Enabled)
             {
                 services.AddSignalR();
@@ -69,21 +69,21 @@ namespace SpikeCore.Web
                     .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             }
 
+            var containerBuilder = new ContainerBuilder();
+
+            containerBuilder.Populate(services);
+
             var botConfig = new BotConfig();
             Configuration.GetSection("Bot").Bind(botConfig);
             containerBuilder.RegisterInstance(botConfig);
 
             containerBuilder
-                .RegisterType<InMemoryMessageBus>()
-                .As<IMessageBus>()
-                .SingleInstance();
-            
-            // Auto-Activate our Bot instance: this isn't injected anywhere, so if we forget to do this, we're in trouble.
+                .RegisterFoundatio();
+
             containerBuilder
                 .RegisterType<Bot>()
                 .As<IBot>()
-                .SingleInstance()
-                .AutoActivate();
+                .SingleInstance();
             
             containerBuilder
                 .RegisterType<IrcClient>()
@@ -95,9 +95,14 @@ namespace SpikeCore.Web
                 .As<IBotManager>()
                 .SingleInstance();
 
-            containerBuilder.Populate(services);
+            var container = containerBuilder.Build();
 
-            return new AutofacServiceProvider(containerBuilder.Build());
+            // Grab an instance of IBot so that it gets activated.
+            // We don't need to keep hold of it, it's a singleton.
+            // Using AutoActivate meant RegisterFoundatio wasn't able to hook Activated before activation.
+            var bot = container.Resolve<IBot>();
+
+            return new AutofacServiceProvider(container);
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)

@@ -1,10 +1,10 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using SpikeCore.Data.Models;
 
 namespace SpikeCore.Messages
 {
     public class IrcChannelMessageMessage
     {
-        public IdentityUser<string> IdentityUser { get; set; }
+        public SpikeCoreUser IdentityUser { get; set; }
         public string ChannelName { get; set; }
         public string UserName { get; set; }
         public string UserHostName { get; set; }

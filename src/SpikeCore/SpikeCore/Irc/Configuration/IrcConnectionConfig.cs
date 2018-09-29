@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace SpikeCore.Irc.Configuration
 {
-    public class BotConfig
+    public class IrcConnectionConfig
     {
         public string Host { get; set; } 
         public int Port { get; set; }

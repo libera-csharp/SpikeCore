@@ -6,22 +6,24 @@ using Foundatio.Messaging;
 using Microsoft.AspNetCore.Identity;
 
 using SpikeCore.Data.Models;
-using SpikeCore.Irc;
-using SpikeCore.Messages;
+using SpikeCore.Irc.Configuration;
+using SpikeCore.MessageBus;
 
-namespace SpikeCore
+namespace SpikeCore.Irc
 {
-    public class Bot : IBot, IMessageHandler<IrcConnectMessage>, IMessageHandler<IrcSendMessage>
+    public class IrcConnection : IIrcConnection, IMessageHandler<IrcConnectMessage>, IMessageHandler<IrcSendMessage>
     {
         private readonly IIrcClient _ircClient;
         private readonly IMessageBus _messageBus;
         private readonly UserManager<SpikeCoreUser> _userManager;
+        private readonly IrcConnectionConfig _config;
 
-        public Bot(IIrcClient ircClient, IMessageBus messageBus, UserManager<SpikeCoreUser> userManager)
+        public IrcConnection(IIrcClient ircClient, IMessageBus messageBus, UserManager<SpikeCoreUser> userManager, IrcConnectionConfig botConfig)
         {
             _ircClient = ircClient;
             _messageBus = messageBus;
             _userManager = userManager;
+            _config = botConfig;
         }
 
         public Task HandleMessageAsync(IrcConnectMessage message, CancellationToken cancellationToken)
@@ -44,13 +46,13 @@ namespace SpikeCore
 
             _ircClient.MessageReceived = (receivedMessage) => _messageBus.PublishAsync(new IrcReceiveMessage(receivedMessage));
 
-            _ircClient.Connect();
+            _ircClient.Connect(_config.Host, _config.Port, _config.Nickname, _config.Channels);
 
             return Task.CompletedTask;
         }
 
         public Task HandleMessageAsync(IrcSendMessage message, CancellationToken cancellationToken)
-        { 
+        {
             _ircClient.SendMessage(message.Message);
 
             return Task.CompletedTask;

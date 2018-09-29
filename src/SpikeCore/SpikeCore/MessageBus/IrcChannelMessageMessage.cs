@@ -1,6 +1,6 @@
 ﻿using SpikeCore.Data.Models;
 
-namespace SpikeCore.Messages
+namespace SpikeCore.MessageBus
 {
     public class IrcChannelMessageMessage
     {

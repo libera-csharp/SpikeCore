@@ -1,4 +1,4 @@
-namespace SpikeCore.Messages
+namespace SpikeCore.MessageBus
 {
     public class IrcReceiveMessage
     {

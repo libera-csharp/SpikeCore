@@ -16,7 +16,7 @@ using SpikeCore.Data.Models;
 using SpikeCore.Irc;
 using SpikeCore.Irc.Configuration;
 using SpikeCore.Irc.IrcDotNet;
-using SpikeCore.Web.AutofacFoundatio;
+using SpikeCore.MessageBus.Foundatio.AutofacIntegration;
 using SpikeCore.Web.Configuration;
 using SpikeCore.Web.Hubs;
 using SpikeCore.Web.Services;
@@ -73,16 +73,16 @@ namespace SpikeCore.Web
 
             containerBuilder.Populate(services);
 
-            var botConfig = new BotConfig();
-            Configuration.GetSection("Bot").Bind(botConfig);
-            containerBuilder.RegisterInstance(botConfig);
+            var ircConnectionConfig = new IrcConnectionConfig();
+            Configuration.GetSection("IrcConnection").Bind(ircConnectionConfig);
+            containerBuilder.RegisterInstance(ircConnectionConfig);
 
             containerBuilder
                 .RegisterFoundatio();
 
             containerBuilder
-                .RegisterType<Bot>()
-                .As<IBot>()
+                .RegisterType<IrcConnection>()
+                .As<IIrcConnection>()
                 .SingleInstance();
             
             containerBuilder
@@ -91,8 +91,8 @@ namespace SpikeCore.Web
                 .SingleInstance();           
             
             containerBuilder
-                .RegisterType<BotManager>()
-                .As<IBotManager>()
+                .RegisterType<SignalRMessageBusConnector>()
+                .As<ISignalRMessageBusConnector>()
                 .SingleInstance();
 
             var container = containerBuilder.Build();
@@ -100,7 +100,7 @@ namespace SpikeCore.Web
             // Grab an instance of IBot so that it gets activated.
             // We don't need to keep hold of it, it's a singleton.
             // Using AutoActivate meant RegisterFoundatio wasn't able to hook Activated before activation.
-            var bot = container.Resolve<IBot>();
+            container.Resolve<IIrcConnection>();
 
             return new AutofacServiceProvider(container);
         }

@@ -5,17 +5,17 @@ using Foundatio.Messaging;
 
 using Microsoft.AspNetCore.SignalR;
 
-using SpikeCore.Messages;
+using SpikeCore.MessageBus;
 using SpikeCore.Web.Hubs;
 
 namespace SpikeCore.Web.Services
 {
-    public class BotManager : IBotManager, IMessageHandler<IrcReceiveMessage>
+    public class SignalRMessageBusConnector : ISignalRMessageBusConnector, IMessageHandler<IrcReceiveMessage>
     {
         private readonly IHubContext<TestHub> _hubContext;
         private readonly IMessageBus _messageBus;
 
-        public BotManager(IHubContext<TestHub> hubContext, IMessageBus messageBus)
+        public SignalRMessageBusConnector(IHubContext<TestHub> hubContext, IMessageBus messageBus)
         {
             _hubContext = hubContext;
             _messageBus = messageBus;
@@ -25,7 +25,7 @@ namespace SpikeCore.Web.Services
             => await _messageBus.PublishAsync(new IrcConnectMessage());
 
         public async Task HandleMessageAsync(IrcReceiveMessage message, CancellationToken cancellationToken)
-            => await _hubContext.Clients.All.SendAsync("ReceiveMessage", message.Message);
+            => await _hubContext.Clients.All.SendAsync("ReceiveMessage", message.Message, cancellationToken);
 
         public async Task SendMessageAsync(string message)
             => await _messageBus.PublishAsync(new IrcSendMessage(message));

@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Identity;
 
 using SpikeCore.Data.Models;
 using SpikeCore.Irc;
-using SpikeCore.Messages;
+using SpikeCore.MessageBus;
 
 namespace SpikeCore
 {

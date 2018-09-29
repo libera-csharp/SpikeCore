@@ -5,7 +5,7 @@ using Foundatio.Messaging;
 
 using Microsoft.AspNetCore.SignalR;
 
-using SpikeCore.Messages;
+using SpikeCore.MessageBus;
 using SpikeCore.Web.Hubs;
 
 namespace SpikeCore.Web.Services

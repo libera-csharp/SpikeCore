@@ -5,7 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="IrcDotNet" Version="0.7.0" />
+    <PackageReference Include="Autofac" Version="4.8.1" />
+    <PackageReference Include="Foundatio" Version="7.0.1738" />
   </ItemGroup>
 
   <ItemGroup>

@@ -16,7 +16,7 @@ using SpikeCore.Data.Models;
 using SpikeCore.Irc;
 using SpikeCore.Irc.Configuration;
 using SpikeCore.Irc.IrcDotNet;
-using SpikeCore.Web.AutofacFoundatio;
+using SpikeCore.MessageBus.Foundatio.AutofacIntergration;
 using SpikeCore.Web.Configuration;
 using SpikeCore.Web.Hubs;
 using SpikeCore.Web.Services;

@@ -9,9 +9,7 @@ using Autofac.Core;
 
 using Foundatio.Messaging;
 
-using SpikeCore.Messages;
-
-namespace SpikeCore.Web.AutofacFoundatio
+namespace SpikeCore.MessageBus.Foundatio.AutofacIntergration
 {
     public static class ContainerBuilderExtensions
     {
@@ -24,7 +22,6 @@ namespace SpikeCore.Web.AutofacFoundatio
                 .RegisterInstance(messageBus)
                 .As<IMessageBus>()
                 .SingleInstance();
-
 
             var subscribeAsyncMethodInfo = typeof(IMessageSubscriber)
                 .GetMethods()

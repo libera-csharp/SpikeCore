@@ -17,9 +17,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SpikeCore.Data\SpikeCore.Data.csproj" />
     <ProjectReference Include="..\SpikeCore.Irc.IrcDotNet\SpikeCore.Irc.IrcDotNet.csproj" />
-    <ProjectReference Include="..\SpikeCore.Irc\SpikeCore.Irc.csproj" />
+    <ProjectReference Include="..\SpikeCore.MessageBus.Foundatio\SpikeCore.MessageBus.Foundatio.csproj" />
     <ProjectReference Include="..\SpikeCore\SpikeCore.csproj" />
   </ItemGroup>
 

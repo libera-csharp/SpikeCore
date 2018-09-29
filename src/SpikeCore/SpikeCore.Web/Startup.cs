@@ -73,9 +73,9 @@ namespace SpikeCore.Web
 
             containerBuilder.Populate(services);
 
-            var botConfig = new BotConfig();
-            Configuration.GetSection("Bot").Bind(botConfig);
-            containerBuilder.RegisterInstance(botConfig);
+            var ircConnectionConfig = new IrcConnectionConfig();
+            Configuration.GetSection("IrcConnection").Bind(ircConnectionConfig);
+            containerBuilder.RegisterInstance(ircConnectionConfig);
 
             containerBuilder
                 .RegisterFoundatio();

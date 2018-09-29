@@ -1,26 +1,22 @@
 ﻿using System;
+using System.Collections.Generic;
 
 using IrcDotNet;
-
-using SpikeCore.Irc.Configuration;
 
 namespace SpikeCore.Irc.IrcDotNet
 {
     public class IrcClient : IIrcClient
     {
-        private readonly BotConfig _botConfig;
         private StandardIrcClient _ircClient;
+        private IEnumerable<string> _channelsToJoin;
         
         public Action<string> MessageReceived { get; set; }
         public Action<ChannelMessage> ChannelMessageReceived { get; set; }
-
-        public IrcClient(BotConfig botConfig)
-        {
-            _botConfig = botConfig;
-        }
         
-        public void Connect()
-        {            
+        public void Connect(string host, int port, string nickname, IEnumerable<string> channelsToJoin)
+        {
+            _channelsToJoin = channelsToJoin;
+
             _ircClient = new StandardIrcClient();
             _ircClient.RawMessageReceived += IrcClient_RawMessageReceived;
 
@@ -28,11 +24,11 @@ namespace SpikeCore.Irc.IrcDotNet
             _ircClient.ConnectFailed += IrcClient_ConnectFailed;
             _ircClient.Registered += _ircClient_Registered;
 
-            _ircClient.Connect(_botConfig.Host, _botConfig.Port, false, new IrcUserRegistrationInfo()
+            _ircClient.Connect(host, port, false, new IrcUserRegistrationInfo()
             {
-                NickName = _botConfig.Nickname,
-                RealName = _botConfig.Nickname,
-                UserName = _botConfig.Nickname,
+                NickName = nickname,
+                RealName = nickname,
+                UserName = nickname,
             });
         }
 
@@ -72,7 +68,11 @@ namespace SpikeCore.Irc.IrcDotNet
         private void IrcClient_Connected(object sender, EventArgs e)
         {
             _ircClient.LocalUser.MessageReceived += LocalUser_MessageReceived;
-            _botConfig.Channels.ForEach(channel => _ircClient.Channels.Join(channel));
+
+            foreach (var channelToJoin in _channelsToJoin)
+            {
+                _ircClient.Channels.Join(channelToJoin);
+            }
         }
 
         private void LocalUser_MessageReceived(object sender, IrcMessageEventArgs e)

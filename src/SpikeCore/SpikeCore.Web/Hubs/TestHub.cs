@@ -8,18 +8,18 @@ namespace SpikeCore.Web.Hubs
 {
     public class TestHub : Hub
     {
-        private readonly IBotManager _botManager;
+        private readonly ISignalRMessageBusConnector _signalRMessageBusConnector;
 
-        public TestHub(IBotManager botManager)
+        public TestHub(ISignalRMessageBusConnector botManager)
         {
-            _botManager = botManager;
+            _signalRMessageBusConnector = botManager;
         }
 
-        public async Task Connect() => await _botManager.ConnectAsync();
+        public async Task Connect() => await _signalRMessageBusConnector.ConnectAsync();
 
         public async Task SendMessage(string message)
         {
-            await _botManager.SendMessageAsync(message);
+            await _signalRMessageBusConnector.SendMessageAsync(message);
             await Clients.All.SendAsync("ReceiveMessage", "[Sent from Web UI]: " + message);
         }
     }

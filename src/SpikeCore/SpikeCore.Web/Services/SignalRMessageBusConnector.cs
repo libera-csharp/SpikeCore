@@ -10,12 +10,12 @@ using SpikeCore.Web.Hubs;
 
 namespace SpikeCore.Web.Services
 {
-    public class BotManager : IBotManager, IMessageHandler<IrcReceiveMessage>
+    public class SignalRMessageBusConnector : ISignalRMessageBusConnector, IMessageHandler<IrcReceiveMessage>
     {
         private readonly IHubContext<TestHub> _hubContext;
         private readonly IMessageBus _messageBus;
 
-        public BotManager(IHubContext<TestHub> hubContext, IMessageBus messageBus)
+        public SignalRMessageBusConnector(IHubContext<TestHub> hubContext, IMessageBus messageBus)
         {
             _hubContext = hubContext;
             _messageBus = messageBus;

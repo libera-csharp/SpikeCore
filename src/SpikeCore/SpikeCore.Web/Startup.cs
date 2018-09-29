@@ -91,8 +91,8 @@ namespace SpikeCore.Web
                 .SingleInstance();           
             
             containerBuilder
-                .RegisterType<BotManager>()
-                .As<IBotManager>()
+                .RegisterType<SignalRMessageBusConnector>()
+                .As<ISignalRMessageBusConnector>()
                 .SingleInstance();
 
             var container = containerBuilder.Build();

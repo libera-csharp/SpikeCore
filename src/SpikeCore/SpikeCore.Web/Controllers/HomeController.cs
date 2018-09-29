@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -21,14 +20,6 @@ namespace SpikeCore.Web.Controllers
         public IActionResult Index()
         {
             return View();
-        }
-
-        public async Task<IActionResult> CreateUser()
-        {
-            var user = new SpikeCoreUser { UserName = "spikecore@example.com", Email = "spikecore@example.com" };
-            await _userManager.CreateAsync(user, "spikecore");
-
-            return Content("UN: spikecore@example.com   PW: spikecore");
         }
 
         public IActionResult About()

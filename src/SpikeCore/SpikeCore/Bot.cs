@@ -3,6 +3,9 @@ using System.Threading.Tasks;
 
 using Foundatio.Messaging;
 
+using Microsoft.AspNetCore.Identity;
+
+using SpikeCore.Data.Models;
 using SpikeCore.Irc;
 using SpikeCore.Messages;
 
@@ -12,17 +15,34 @@ namespace SpikeCore
     {
         private readonly IIrcClient _ircClient;
         private readonly IMessageBus _messageBus;
+        private readonly UserManager<SpikeCoreUser> _userManager;
 
-        public Bot(IIrcClient ircClient, IMessageBus messageBus)
+        public Bot(IIrcClient ircClient, IMessageBus messageBus, UserManager<SpikeCoreUser> userManager)
         {
             _ircClient = ircClient;
             _messageBus = messageBus;
+            _userManager = userManager;
         }
 
         public Task HandleMessageAsync(IrcConnectMessage message, CancellationToken cancellationToken)
         {
-            _ircClient.MessageReceived = (receivedMessage)
-                => _messageBus.PublishAsync(new IrcReceiveMessage(receivedMessage));
+            _ircClient.ChannelMessageReceived = async (channelMessage) =>
+            {
+                var user = await _userManager.FindByLoginAsync("IrcHost", channelMessage.UserHostName);
+
+                var ircChannelMessageMessage = new IrcChannelMessageMessage()
+                {
+                    ChannelName = channelMessage.ChannelName,
+                    UserName = channelMessage.UserName,
+                    UserHostName = channelMessage.UserHostName,
+                    Text = channelMessage.Text,
+                    IdentityUser = user
+                };
+
+                await _messageBus.PublishAsync(ircChannelMessageMessage);
+            };
+
+            _ircClient.MessageReceived = (receivedMessage) => _messageBus.PublishAsync(new IrcReceiveMessage(receivedMessage));
 
             _ircClient.Connect();
 

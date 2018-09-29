@@ -16,7 +16,7 @@ using SpikeCore.Data.Models;
 using SpikeCore.Irc;
 using SpikeCore.Irc.Configuration;
 using SpikeCore.Irc.IrcDotNet;
-using SpikeCore.MessageBus.Foundatio.AutofacIntergration;
+using SpikeCore.MessageBus.Foundatio.AutofacIntegration;
 using SpikeCore.Web.Configuration;
 using SpikeCore.Web.Hubs;
 using SpikeCore.Web.Services;
@@ -100,7 +100,7 @@ namespace SpikeCore.Web
             // Grab an instance of IBot so that it gets activated.
             // We don't need to keep hold of it, it's a singleton.
             // Using AutoActivate meant RegisterFoundatio wasn't able to hook Activated before activation.
-            var ircConnection = container.Resolve<IIrcConnection>();
+            container.Resolve<IIrcConnection>();
 
             return new AutofacServiceProvider(container);
         }

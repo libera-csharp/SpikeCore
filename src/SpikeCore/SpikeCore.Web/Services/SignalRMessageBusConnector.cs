@@ -25,7 +25,7 @@ namespace SpikeCore.Web.Services
             => await _messageBus.PublishAsync(new IrcConnectMessage());
 
         public async Task HandleMessageAsync(IrcReceiveMessage message, CancellationToken cancellationToken)
-            => await _hubContext.Clients.All.SendAsync("ReceiveMessage", message.Message);
+            => await _hubContext.Clients.All.SendAsync("ReceiveMessage", message.Message, cancellationToken);
 
         public async Task SendMessageAsync(string message)
             => await _messageBus.PublishAsync(new IrcSendMessage(message));

@@ -51,9 +51,8 @@ namespace SpikeCore.Irc.IrcDotNet
         private void Channel_MessageReceived(object sender, IrcMessageEventArgs e)
         {
             var ircChannel = (IrcChannel)sender;
-            var ircUser = e.Source as IrcUser;
 
-            if (ircChannel != null && ircUser != null)
+            if (ircChannel != null && e.Source is IrcUser ircUser)
             {
                 ChannelMessageReceived?.Invoke(new ChannelMessage()
                 {

@@ -6,18 +6,17 @@ using Foundatio.Messaging;
 using Microsoft.AspNetCore.Identity;
 
 using SpikeCore.Data.Models;
-using SpikeCore.Irc;
 using SpikeCore.MessageBus;
 
-namespace SpikeCore
+namespace SpikeCore.Irc
 {
-    public class Bot : IBot, IMessageHandler<IrcConnectMessage>, IMessageHandler<IrcSendMessage>
+    public class IrcConnection : IIrcConnection, IMessageHandler<IrcConnectMessage>, IMessageHandler<IrcSendMessage>
     {
         private readonly IIrcClient _ircClient;
         private readonly IMessageBus _messageBus;
         private readonly UserManager<SpikeCoreUser> _userManager;
 
-        public Bot(IIrcClient ircClient, IMessageBus messageBus, UserManager<SpikeCoreUser> userManager)
+        public IrcConnection(IIrcClient ircClient, IMessageBus messageBus, UserManager<SpikeCoreUser> userManager)
         {
             _ircClient = ircClient;
             _messageBus = messageBus;
@@ -50,7 +49,7 @@ namespace SpikeCore
         }
 
         public Task HandleMessageAsync(IrcSendMessage message, CancellationToken cancellationToken)
-        { 
+        {
             _ircClient.SendMessage(message.Message);
 
             return Task.CompletedTask;

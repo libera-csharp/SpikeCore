@@ -81,8 +81,8 @@ namespace SpikeCore.Web
                 .RegisterFoundatio();
 
             containerBuilder
-                .RegisterType<Bot>()
-                .As<IBot>()
+                .RegisterType<IrcConnection>()
+                .As<IIrcConnection>()
                 .SingleInstance();
             
             containerBuilder
@@ -100,7 +100,7 @@ namespace SpikeCore.Web
             // Grab an instance of IBot so that it gets activated.
             // We don't need to keep hold of it, it's a singleton.
             // Using AutoActivate meant RegisterFoundatio wasn't able to hook Activated before activation.
-            var bot = container.Resolve<IBot>();
+            var ircConnection = container.Resolve<IIrcConnection>();
 
             return new AutofacServiceProvider(container);
         }

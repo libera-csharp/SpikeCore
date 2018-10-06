@@ -39,14 +39,10 @@ namespace SpikeCore.Irc.IrcDotNet
         }
 
         private void LocalUser_JoinedChannel(object sender, IrcChannelEventArgs e)
-        {
-            e.Channel.MessageReceived += Channel_MessageReceived;
-        }
+            => e.Channel.MessageReceived += Channel_MessageReceived;
 
         private void LocalUser_LeftChannel(object sender, IrcChannelEventArgs e)
-        {
-            e.Channel.MessageReceived -= Channel_MessageReceived;
-        }
+            => e.Channel.MessageReceived -= Channel_MessageReceived;
 
         private void Channel_MessageReceived(object sender, IrcMessageEventArgs e)
         {
@@ -75,14 +71,14 @@ namespace SpikeCore.Irc.IrcDotNet
         }
 
         private void LocalUser_MessageReceived(object sender, IrcMessageEventArgs e)
-        {
-            MessageReceived?.Invoke($"{e.Source.Name}: {e.Targets}: {e.Text}");
-        }
+            => MessageReceived?.Invoke($"{e.Source.Name}: {e.Targets}: {e.Text}");
 
-        private void IrcClient_ConnectFailed(object sender, IrcErrorEventArgs e) => MessageReceived?.Invoke($"IrcClient_ConnectFailed: {e.Error.Message}");
-        private void IrcClient_RawMessageReceived(object sender, IrcRawMessageEventArgs e) => MessageReceived?.Invoke($"RAW: {e.RawContent}");
+        private void IrcClient_ConnectFailed(object sender, IrcErrorEventArgs e)
+            => MessageReceived?.Invoke($"IrcClient_ConnectFailed: {e.Error.Message}");
+
+        private void IrcClient_RawMessageReceived(object sender, IrcRawMessageEventArgs e)
+            => MessageReceived?.Invoke($"RAW: {e.RawContent}");
         
-        // TODO: [Kog 9/17/2018] - Need to wire this back through the UI, which is kinda broken right now anyway...
         public void SendChannelMessage(string channelName, string message) => _ircClient.LocalUser.SendMessage(channelName, message);
     }
 }

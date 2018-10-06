@@ -1,5 +1,6 @@
 ﻿using System;
-
+using System.Collections.Generic;
+using System.Linq;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 
@@ -17,6 +18,7 @@ using SpikeCore.Irc;
 using SpikeCore.Irc.Configuration;
 using SpikeCore.Irc.IrcDotNet;
 using SpikeCore.MessageBus.Foundatio.AutofacIntegration;
+using SpikeCore.Modules;
 using SpikeCore.Web.Configuration;
 using SpikeCore.Web.Hubs;
 using SpikeCore.Web.Services;
@@ -76,6 +78,10 @@ namespace SpikeCore.Web
             var ircConnectionConfig = new IrcConnectionConfig();
             Configuration.GetSection("IrcConnection").Bind(ircConnectionConfig);
             containerBuilder.RegisterInstance(ircConnectionConfig);
+            
+            var moduleConfiguration = new ModuleConfiguration();
+            Configuration.GetSection("Modules").Bind(moduleConfiguration);
+            containerBuilder.RegisterInstance(moduleConfiguration);
 
             containerBuilder
                 .RegisterFoundatio();
@@ -88,19 +94,29 @@ namespace SpikeCore.Web
             containerBuilder
                 .RegisterType<IrcClient>()
                 .As<IIrcClient>()
-                .SingleInstance();           
+                .SingleInstance();
             
             containerBuilder
                 .RegisterType<SignalRMessageBusConnector>()
                 .As<ISignalRMessageBusConnector>()
                 .SingleInstance();
 
+            containerBuilder
+                .RegisterAssemblyTypes(AppDomain.CurrentDomain.GetAssemblies().Single(assembly => assembly.GetName().Name == "SpikeCore"))
+                .Where(t => t.Name.EndsWith("Module"))
+                .As<IModule>()
+                .PropertiesAutowired()
+                .SingleInstance();
+            
             var container = containerBuilder.Build();
 
             // Grab an instance of IBot so that it gets activated.
             // We don't need to keep hold of it, it's a singleton.
             // Using AutoActivate meant RegisterFoundatio wasn't able to hook Activated before activation.
             container.Resolve<IIrcConnection>();
+            
+            // We also need to resolve all of our modules.
+            container.Resolve<IEnumerable<IModule>>();
 
             return new AutofacServiceProvider(container);
         }

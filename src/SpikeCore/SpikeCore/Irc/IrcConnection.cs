@@ -11,7 +11,7 @@ using SpikeCore.MessageBus;
 
 namespace SpikeCore.Irc
 {
-    public class IrcConnection : IIrcConnection, IMessageHandler<IrcConnectMessage>, IMessageHandler<IrcSendMessage>
+    public class IrcConnection : IIrcConnection, IMessageHandler<IrcConnectMessage>, IMessageHandler<IrcSendChannelMessage>
     {
         private readonly IIrcClient _ircClient;
         private readonly IMessageBus _messageBus;
@@ -51,11 +51,11 @@ namespace SpikeCore.Irc
             return Task.CompletedTask;
         }
 
-        public Task HandleMessageAsync(IrcSendMessage ircSendMessage, CancellationToken cancellationToken)
+        public Task HandleMessageAsync(IrcSendChannelMessage ircSendMessage, CancellationToken cancellationToken)
         {
             foreach (var message in ircSendMessage.Messages)
             {
-                _ircClient.SendMessage(message);
+                _ircClient.SendChannelMessage(ircSendMessage.ChannelName, message);
             }
 
             return Task.CompletedTask;

@@ -83,6 +83,6 @@ namespace SpikeCore.Irc.IrcDotNet
         private void IrcClient_RawMessageReceived(object sender, IrcRawMessageEventArgs e) => MessageReceived?.Invoke($"RAW: {e.RawContent}");
         
         // TODO: [Kog 9/17/2018] - Need to wire this back through the UI, which is kinda broken right now anyway...
-        public void SendMessage(string message) => _ircClient.LocalUser.SendMessage("#spikelite", message);
+        public void SendChannelMessage(string channelName, string message) => _ircClient.LocalUser.SendMessage(channelName, message);
     }
 }

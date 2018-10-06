@@ -15,8 +15,6 @@ namespace SpikeCore.Web.Hubs
             _signalRMessageBusConnector = botManager;
         }
 
-        public async Task Connect() => await _signalRMessageBusConnector.ConnectAsync();
-
         public async Task SendMessage(string message)
         {
             await _signalRMessageBusConnector.SendMessageAsync(message);

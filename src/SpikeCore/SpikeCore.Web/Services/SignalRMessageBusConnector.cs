@@ -27,7 +27,9 @@ namespace SpikeCore.Web.Services
         public async Task HandleMessageAsync(IrcReceiveMessage message, CancellationToken cancellationToken)
             => await _hubContext.Clients.All.SendAsync("ReceiveMessage", message.Message, cancellationToken);
 
+        // This should be "string channelName, string message" but UI work is being punted
+        // until the React intergration.
         public async Task SendMessageAsync(string message)
-            => await _messageBus.PublishAsync(new IrcSendMessage(message));
+            => await _messageBus.PublishAsync(new IrcSendChannelMessage("#spikelite", message));
     }
 }

@@ -9,6 +9,6 @@ namespace SpikeCore.Irc
         Action<string> MessageReceived { get; set; }
 
         void Connect(string host, int port, string nickname, IEnumerable<string> channelsToJoin);
-        void SendMessage(string message);
+        void SendChannelMessage(string channelname, string message);
     }
 }

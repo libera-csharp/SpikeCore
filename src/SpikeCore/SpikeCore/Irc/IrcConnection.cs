@@ -25,7 +25,6 @@ namespace SpikeCore.Irc
             _userManager = userManager;
             _config = botConfig;
 
-            // Temporarily auto-connect on start up. This will be handled externally when there's infrastructure for that. 
             Connect();
         }
 

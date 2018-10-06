@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SpikeCore.Irc.Irc4NetButSmarter\SpikeCore.Irc.Irc4NetButSmarter.csproj" />
     <ProjectReference Include="..\SpikeCore.Irc.IrcDotNet\SpikeCore.Irc.IrcDotNet.csproj" />
     <ProjectReference Include="..\SpikeCore.MessageBus.Foundatio\SpikeCore.MessageBus.Foundatio.csproj" />
     <ProjectReference Include="..\SpikeCore\SpikeCore.csproj" />

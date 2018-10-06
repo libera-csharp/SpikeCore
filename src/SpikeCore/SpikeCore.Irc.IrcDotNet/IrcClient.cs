@@ -5,17 +5,13 @@ using IrcDotNet;
 
 namespace SpikeCore.Irc.IrcDotNet
 {
-    public class IrcClient : IIrcClient
+    public class IrcClient : IrcClientBase
     {
         private StandardIrcClient _ircClient;
-        private IEnumerable<string> _channelsToJoin;
-        
-        public Action<string> MessageReceived { get; set; }
-        public Action<ChannelMessage> ChannelMessageReceived { get; set; }
-        
-        public void Connect(string host, int port, string nickname, IEnumerable<string> channelsToJoin)
+
+        public override void Connect(string host, int port, string nickname, IEnumerable<string> channelsToJoin)
         {
-            _channelsToJoin = channelsToJoin;
+            base.Connect(host, port, nickname, channelsToJoin);
 
             _ircClient = new StandardIrcClient();
             _ircClient.RawMessageReceived += IrcClient_RawMessageReceived;
@@ -79,6 +75,7 @@ namespace SpikeCore.Irc.IrcDotNet
         private void IrcClient_RawMessageReceived(object sender, IrcRawMessageEventArgs e)
             => MessageReceived?.Invoke($"RAW: {e.RawContent}");
         
-        public void SendChannelMessage(string channelName, string message) => _ircClient.LocalUser.SendMessage(channelName, message);
+        public override void SendChannelMessage(string channelName, string message)
+            => _ircClient.LocalUser.SendMessage(channelName, message);
     }
 }

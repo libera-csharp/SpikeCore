@@ -24,9 +24,29 @@ namespace SpikeCore.Irc
             _messageBus = messageBus;
             _userManager = userManager;
             _config = botConfig;
+
+            // Temporarily auto-connect on start up. This will be handled externally when there's infrastructure for that. 
+            Connect();
         }
 
         public Task HandleMessageAsync(IrcConnectMessage message, CancellationToken cancellationToken)
+        {
+            Connect();
+
+            return Task.CompletedTask;
+        }
+
+        public Task HandleMessageAsync(IrcSendChannelMessage ircSendMessage, CancellationToken cancellationToken)
+        {
+            foreach (var message in ircSendMessage.Messages)
+            {
+                _ircClient.SendChannelMessage(ircSendMessage.ChannelName, message);
+            }
+
+            return Task.CompletedTask;
+        }
+
+        private void Connect()
         {
             _ircClient.ChannelMessageReceived = async (channelMessage) =>
             {
@@ -47,18 +67,6 @@ namespace SpikeCore.Irc
             _ircClient.MessageReceived = (receivedMessage) => _messageBus.PublishAsync(new IrcReceiveMessage(receivedMessage));
 
             _ircClient.Connect(_config.Host, _config.Port, _config.Nickname, _config.Channels);
-
-            return Task.CompletedTask;
-        }
-
-        public Task HandleMessageAsync(IrcSendChannelMessage ircSendMessage, CancellationToken cancellationToken)
-        {
-            foreach (var message in ircSendMessage.Messages)
-            {
-                _ircClient.SendChannelMessage(ircSendMessage.ChannelName, message);
-            }
-
-            return Task.CompletedTask;
         }
     }
 }

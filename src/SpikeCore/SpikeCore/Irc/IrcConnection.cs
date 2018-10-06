@@ -51,9 +51,12 @@ namespace SpikeCore.Irc
             return Task.CompletedTask;
         }
 
-        public Task HandleMessageAsync(IrcSendMessage message, CancellationToken cancellationToken)
+        public Task HandleMessageAsync(IrcSendMessage ircSendMessage, CancellationToken cancellationToken)
         {
-            _ircClient.SendMessage(message.Message);
+            foreach (var message in ircSendMessage.Messages)
+            {
+                _ircClient.SendMessage(message);
+            }
 
             return Task.CompletedTask;
         }

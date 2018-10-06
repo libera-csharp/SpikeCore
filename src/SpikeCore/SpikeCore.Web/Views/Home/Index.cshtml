@@ -2,26 +2,38 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="container">
-    <div class="row">&nbsp;</div>
-    <div class="row">
-        <div class="col-6">&nbsp;</div>
-        <div class="col-6">
-            Message...<input type="text" id="messageInput" />
-            <input type="button" id="sendButton" value="Send Message" />
+<div class="pageContainer">
+
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand">SpikeCore.Web</a>
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li><a asp-area="" asp-controller="Home" asp-action="Index">Home</a></li>
+                    <li><a asp-area="" asp-controller="Home" asp-action="About">About</a></li>
+                    <li><a asp-area="" asp-controller="Home" asp-action="Contact">Contact</a></li>
+                </ul>
+                <partial name="_LoginPartial" />
+            </div>
         </div>
+    </nav>
+
+    <div id="messagesListContainer" class="messageListContainer">
+        <ul id="messagesList"></ul>
     </div>
-    <div class="row">
-        <div class="col-12">
-            <hr />
-        </div>
+
+    <div class="sendMessageContainer">
+        <input type="text" id="messageInput" class="sendMessageTextBox" placeholder="Message to send..." /><input type="button" id="sendButton" value="Send" />
     </div>
-    <div class="row">
-        <div class="col-6">&nbsp;</div>
-        <div class="col-6">
-            <ul id="messagesList"></ul>
-        </div>
-    </div>
+
 </div>
 
 @section Scripts {

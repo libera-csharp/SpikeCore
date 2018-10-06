@@ -16,7 +16,7 @@ namespace SpikeCore.Irc.Irc4NetButSmarter
             _ircClient = new SIRC4N.IrcClient();
             _ircClient.OnRawMessage += _ircClient_OnRawMessage;
             _ircClient.OnRegistered += _ircClient_OnRegistered;
-            _ircClient.OnChannelMessage -= _ircClient_OnChannelMessage;
+            _ircClient.OnChannelMessage += _ircClient_OnChannelMessage;
 
             base.Connect(host, port, nickname, channelsToJoin);
 

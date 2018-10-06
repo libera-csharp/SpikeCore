@@ -13,13 +13,6 @@ connection.start().catch(function (err) {
     return console.error(err.toString());
 });
 
-document.getElementById("connectButton").addEventListener("click", function (event) {
-    connection.invoke("Connect").catch(function (err) {
-        return console.error(err.toString());
-    });
-    event.preventDefault();
-});
-
 document.getElementById("sendButton").addEventListener("click", function (event) {
     var message = document.getElementById("messageInput").value;
     connection.invoke("SendMessage", message).catch(function (err) {

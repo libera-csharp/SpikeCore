@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+
 using SpikeCore.MessageBus;
 
 namespace SpikeCore.Modules
@@ -16,7 +17,7 @@ namespace SpikeCore.Modules
 
         protected override async Task HandleMessageAsyncInternal(IrcChannelMessageMessage message, CancellationToken cancellationToken)
         {
-            await SendMessageToChannel("SpikeCore: " + _taglines[_random.Next(0, _taglines.Length)]);
+            await SendMessageToChannel(message.ChannelName, "SpikeCore: " + _taglines[_random.Next(0, _taglines.Length)]);
         }
     }
 }

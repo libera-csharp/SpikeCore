@@ -9,7 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpikeCore.Irc.IrcDotNet", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpikeCore", "SpikeCore\SpikeCore.csproj", "{FC68C5CA-7182-4724-8916-6636CEB66A59}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpikeCore.MessageBus.Foundatio", "SpikeCore.MessageBus.Foundatio\SpikeCore.MessageBus.Foundatio.csproj", "{27A052EE-25CC-4EAA-A1A9-A83327527268}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpikeCore.MessageBus.Foundatio", "SpikeCore.MessageBus.Foundatio\SpikeCore.MessageBus.Foundatio.csproj", "{27A052EE-25CC-4EAA-A1A9-A83327527268}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpikeCore.Irc.Irc4NetButSmarter", "SpikeCore.Irc.Irc4NetButSmarter\SpikeCore.Irc.Irc4NetButSmarter.csproj", "{6DC8FFDB-C251-4F5A-B48E-B3581EDD92A6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{27A052EE-25CC-4EAA-A1A9-A83327527268}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{27A052EE-25CC-4EAA-A1A9-A83327527268}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{27A052EE-25CC-4EAA-A1A9-A83327527268}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6DC8FFDB-C251-4F5A-B48E-B3581EDD92A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6DC8FFDB-C251-4F5A-B48E-B3581EDD92A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6DC8FFDB-C251-4F5A-B48E-B3581EDD92A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6DC8FFDB-C251-4F5A-B48E-B3581EDD92A6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

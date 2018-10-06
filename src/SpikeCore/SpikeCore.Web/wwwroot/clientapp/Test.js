@@ -26,6 +26,9 @@ connection.on("ReceiveMessage", function (message) {
 
     var messageList = document.getElementById("messagesList");
     messageList.appendChild(li);
+
+    var messageListContainer = document.getElementById("messagesListContainer");
+    messageListContainer.scrollTop = messageListContainer.scrollHeight;
 });
 
 document.getElementById("sendButton").addEventListener("click", function (event) {

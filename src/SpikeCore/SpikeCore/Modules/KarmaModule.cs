@@ -13,7 +13,7 @@ namespace SpikeCore.Modules
     {
         public override string Name => "Karma";
         public override string Description => "The wheel in the sky keeps on turning";
-        public override string Instructions => "karma <user> | <user++>" ;
+        public override string Instructions => "karma <user>(++|--)" ;
 
         private readonly SpikeCoreDbContext _context;       
         private static readonly Regex KarmaRegex = new Regex(@"~karma\s([^\-\+]+)((\-\-)|(\+\+))?");

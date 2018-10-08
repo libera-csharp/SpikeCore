@@ -21,7 +21,7 @@ namespace SpikeCore.Modules
 
         // TODO [Kog 10/06/2018] : work in access checks etc.
         public Task HandleMessageAsync(IrcChannelMessageMessage message, CancellationToken cancellationToken)
-            => message.Text.StartsWith(Configuration.TriggerPrefix + Name, StringComparison.InvariantCultureIgnoreCase)
+            => message.Text.StartsWith(Configuration.TriggerPrefix + Name, StringComparison.InvariantCultureIgnoreCase) && message.IdentityUser != null
                 ? HandleMessageAsyncInternal(message, cancellationToken)
                 : Task.CompletedTask;
 

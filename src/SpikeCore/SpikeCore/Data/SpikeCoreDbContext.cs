@@ -8,6 +8,7 @@ namespace SpikeCore.Data
     public class SpikeCoreDbContext : IdentityDbContext<SpikeCoreUser>
     {
         public DbSet<KarmaItem> Karma { get; set; }
+        public DbSet<Factoid> Factoids { get; set; }
         
         public SpikeCoreDbContext(DbContextOptions<SpikeCoreDbContext> options) : base(options) { }
 
@@ -22,6 +23,16 @@ namespace SpikeCore.Data
             builder.Entity<KarmaItem>()
                 .HasIndex(karmaItem => karmaItem.Name)
                 .IsUnique();
+            
+            builder.Entity<Factoid>(b =>
+            {
+                b.Property<long>("Id")
+                    .ValueGeneratedOnAdd();
+
+                b.HasKey(factoid => factoid.Id);
+
+                b.HasIndex(factoid => factoid.Name);
+            });
         }
     }
 }

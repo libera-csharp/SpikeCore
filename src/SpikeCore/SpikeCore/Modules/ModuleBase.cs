@@ -15,7 +15,7 @@ namespace SpikeCore.Modules
         public abstract string Description { get; }
         public abstract string Instructions { get; }
 
-        public virtual List<string> Triggers => new List<string> {Name};
+        public virtual IEnumerable<string> Triggers => new List<string> {Name};
 
         public IMessageBus MessageBus { private get; set; }
         public ModuleConfiguration Configuration { get; set; }

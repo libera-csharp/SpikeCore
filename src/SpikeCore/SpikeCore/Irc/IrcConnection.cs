@@ -50,7 +50,7 @@ namespace SpikeCore.Irc
             _ircClient.ChannelMessageReceived = async (channelMessage) =>
             {
                 var user = await _userManager.FindByLoginAsync("IrcHost", channelMessage.UserHostName);
-
+                
                 var ircChannelMessageMessage = new IrcChannelMessageMessage()
                 {
                     ChannelName = channelMessage.ChannelName,

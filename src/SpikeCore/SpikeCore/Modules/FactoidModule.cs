@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -15,10 +16,11 @@ namespace SpikeCore.Modules
         public override string Name => "factoids";
         public override string Description => "Keeps track of factoids.";
         public override string Instructions => "factoid <ban|idiot|warn> <message>";
+        public override List<string> Triggers => new List<string> { "ban", "idiot", "warn" };
 
         private readonly SpikeCoreDbContext _context;
         private const int FactDisplayCount = 5;
-        private static readonly Regex FactoidRegex = new Regex(@"~factoids\s(\w+)\s(\S+)\s?(.*)?");
+        private static readonly Regex FactoidRegex = new Regex(@"~(idiot|ban|warn)\s(\S+)\s?(.*)?");
 
         public FactoidModule(SpikeCoreDbContext context)
         {

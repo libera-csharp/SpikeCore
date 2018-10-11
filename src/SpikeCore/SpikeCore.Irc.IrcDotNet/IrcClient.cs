@@ -9,9 +9,9 @@ namespace SpikeCore.Irc.IrcDotNet
     {
         private StandardIrcClient _ircClient;
 
-        public override void Connect(string host, int port, string nickname, IEnumerable<string> channelsToJoin)
+        public override void Connect(string host, int port, string nickname, IEnumerable<string> channelsToJoin, bool authenticate, string password)
         {
-            base.Connect(host, port, nickname, channelsToJoin);
+            base.Connect(host, port, nickname, channelsToJoin, authenticate, password);
 
             _ircClient = new StandardIrcClient();
             _ircClient.RawMessageReceived += IrcClient_RawMessageReceived;
@@ -60,6 +60,11 @@ namespace SpikeCore.Irc.IrcDotNet
         {
             _ircClient.LocalUser.MessageReceived += LocalUser_MessageReceived;
 
+            if (_authenticate)
+            {
+                _ircClient.LocalUser.SendMessage("nickserv", $"identify {_password}");
+            }
+            
             foreach (var channelToJoin in _channelsToJoin)
             {
                 _ircClient.Channels.Join(channelToJoin);

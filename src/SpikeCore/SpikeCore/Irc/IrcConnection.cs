@@ -65,7 +65,7 @@ namespace SpikeCore.Irc
 
             _ircClient.MessageReceived = (receivedMessage) => _messageBus.PublishAsync(new IrcReceiveMessage(receivedMessage));
 
-            _ircClient.Connect(_config.Host, _config.Port, _config.Nickname, _config.Channels);
+            _ircClient.Connect(_config.Host, _config.Port, _config.Nickname, _config.Channels, _config.Authenticate, _config.Password);
         }
     }
 }

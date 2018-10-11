@@ -5,7 +5,7 @@ namespace SpikeCore.Irc
 {
     public abstract class IrcClientBase: IIrcClient
     {
-        protected IEnumerable<string> _channelsToJoin;
+        private IEnumerable<string> _channelsToJoin;
         protected bool _authenticate;
         protected string _password;
 
@@ -19,6 +19,26 @@ namespace SpikeCore.Irc
             _password = password;
         }
 
+        protected static bool NoticeIsExpectedServicesAgentMessage(string nickname, string notice)
+        {
+            if ("nickserv".Equals(nickname, StringComparison.OrdinalIgnoreCase))
+            {
+                return notice.StartsWith("You are now identified for", StringComparison.OrdinalIgnoreCase) ||
+                       (notice.StartsWith("The nickname", StringComparison.OrdinalIgnoreCase) && notice.EndsWith("is not registered", StringComparison.OrdinalIgnoreCase));
+            }
+
+            return false;
+        }
+        
+        protected void JoinChannelsForNetwork()
+        {            
+            foreach (var channel in _channelsToJoin)
+            {
+                JoinChannel(channel);
+            }
+        }
+        
         public abstract void SendChannelMessage(string channelName, string message);
+        public abstract void JoinChannel(string channelName);
     }
 }

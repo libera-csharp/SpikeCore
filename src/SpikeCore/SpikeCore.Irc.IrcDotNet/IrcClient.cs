@@ -32,6 +32,7 @@ namespace SpikeCore.Irc.IrcDotNet
         {
             _ircClient.LocalUser.JoinedChannel += LocalUser_JoinedChannel;
             _ircClient.LocalUser.LeftChannel += LocalUser_LeftChannel;
+            _ircClient.LocalUser.NoticeReceived += LocalUser_NoticeReceived;
         }
 
         private void LocalUser_JoinedChannel(object sender, IrcChannelEventArgs e)
@@ -64,10 +65,11 @@ namespace SpikeCore.Irc.IrcDotNet
             {
                 _ircClient.LocalUser.SendMessage("nickserv", $"identify {_password}");
             }
-            
-            foreach (var channelToJoin in _channelsToJoin)
+            else
             {
-                _ircClient.Channels.Join(channelToJoin);
+                // If we're not going to identify to network services, we can join channels immediately - we don't
+                // expect our host to change after this point.
+                JoinChannelsForNetwork();
             }
         }
 
@@ -80,7 +82,20 @@ namespace SpikeCore.Irc.IrcDotNet
         private void IrcClient_RawMessageReceived(object sender, IrcRawMessageEventArgs e)
             => MessageReceived?.Invoke($"RAW: {e.RawContent}");
         
+        private void LocalUser_NoticeReceived(object sender, IrcMessageEventArgs e)
+        {
+            var user = e.Source as IrcUser;
+            
+            if (_authenticate && NoticeIsExpectedServicesAgentMessage(user.NickName, e.Text))
+            {
+                JoinChannelsForNetwork();
+            }
+        }
+        
         public override void SendChannelMessage(string channelName, string message)
             => _ircClient.LocalUser.SendMessage(channelName, message);
+        
+        public override void JoinChannel(string channelName) 
+            => _ircClient.Channels.Join(channelName);    
     }
 }

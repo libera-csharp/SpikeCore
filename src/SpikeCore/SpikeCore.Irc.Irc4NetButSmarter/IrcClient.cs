@@ -17,6 +17,7 @@ namespace SpikeCore.Irc.Irc4NetButSmarter
             _ircClient.OnRawMessage += _ircClient_OnRawMessage;
             _ircClient.OnRegistered += _ircClient_OnRegistered;
             _ircClient.OnChannelMessage += _ircClient_OnChannelMessage;
+            _ircClient.OnQueryNotice += _ircClient_OnQueryNotice;
 
             base.Connect(host, port, nickname, channelsToJoin, authenticate, password);
 
@@ -32,11 +33,12 @@ namespace SpikeCore.Irc.Irc4NetButSmarter
             if (_authenticate)
             {
                 _ircClient.SendMessage(SIRC4N.SendType.Message, "nickserv", $"identify {_password}");
-            }           
-            
-            foreach (var channelToJoin in _channelsToJoin)
+            }
+            else
             {
-                _ircClient.RfcJoin(channelToJoin);
+                // If we're not going to identify to network services, we can join channels immediately - we don't
+                // expect our host to change after this point.
+                JoinChannelsForNetwork();
             }
         }
 
@@ -52,7 +54,18 @@ namespace SpikeCore.Irc.Irc4NetButSmarter
                 UserName = e.Data.Nick
             });
 
+        private void _ircClient_OnQueryNotice(object sender, SIRC4N.IrcEventArgs e)
+        {
+            if (_authenticate && NoticeIsExpectedServicesAgentMessage(e.Data.Nick, e.Data.Message))
+            {
+                JoinChannelsForNetwork();
+            }            
+        }
+        
         public override void SendChannelMessage(string channelName, string message)
             => _ircClient.SendMessage(SIRC4N.SendType.Message, channelName, message);
+        
+        public override void JoinChannel(string channelName) 
+            => _ircClient.RfcJoin(channelName);        
     }
 }

@@ -9,5 +9,8 @@ namespace SpikeCore.Irc.Configuration
         
         public string Nickname { get; set; }
         public List<string> Channels { get; set; }
+        
+        public bool Authenticate { get; set; }
+        public string Password { get; set; }
     }
 }

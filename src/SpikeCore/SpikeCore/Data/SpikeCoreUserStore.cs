@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -16,29 +15,31 @@ namespace SpikeCore.Data
         public SpikeCoreUserStore(SpikeCoreDbContext context, IdentityErrorDescriber describer = null)
             : base(context, describer) { }
 
-        // HACK - This should be a method with the name FindByLoginStartsWithAsync.
+        // HACK - Ideally this would be a seperate method called something like FindByHostMaskAsync
         // Unfortunatly I couldn't get that exposed in a way that worked with asp.net core identity.
         // So this is the resulting hack...
         public async override Task<SpikeCoreUser> FindByLoginAsync(string loginProvider, string providerKey, CancellationToken cancellationToken = default)
         {
-            if (loginProvider.Equals("IrcHostStartsWith"))
+            if (loginProvider.Equals("IrcHost"))
             {
-                loginProvider = "IrcHost";
+                var directMatchUser = await base.FindByLoginAsync(loginProvider, providerKey, cancellationToken);
 
-                var userLogins = base.Context
+                if (directMatchUser != null)
+                    return directMatchUser;
+
+                var startsWithLogin = await base.Context
                     .Set<IdentityUserLogin<string>>()
-                    .Where(ul => ul.LoginProvider == loginProvider && providerKey.StartsWith(ul.ProviderKey));
-
-                //TODO Logic for prioritising which user to match
-
-                var userLogin = await userLogins
+                    .Where(ul => ul.LoginProvider == "IrcHost|StartsWith" && providerKey.StartsWith(ul.ProviderKey))
                     .FirstOrDefaultAsync();
 
-                var user = await base.Context
+                var startsWithUser = await base.Context
                     .Set<SpikeCoreUser>()
-                    .SingleAsync(u => u.Id.Equals(userLogin.UserId));
+                    .SingleAsync(u => u.Id.Equals(startsWithLogin.UserId));
 
-                return user;
+                if (startsWithUser != null)
+                    return startsWithUser;
+
+                return null;
             }
             else
             {

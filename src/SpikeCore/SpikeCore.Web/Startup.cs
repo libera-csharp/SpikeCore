@@ -63,7 +63,8 @@ namespace SpikeCore.Web
                     options.Password.RequireNonAlphanumeric = false;
                     options.Password.RequireUppercase = false;
                 })
-                .AddEntityFrameworkStores<SpikeCoreDbContext>();
+                .AddEntityFrameworkStores<SpikeCoreDbContext>()
+                .AddUserStore<SpikeCoreUserStore>();
 
             if (WebConfig.Enabled)
             {

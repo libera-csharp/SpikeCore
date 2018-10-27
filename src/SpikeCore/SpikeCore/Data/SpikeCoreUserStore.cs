@@ -10,7 +10,7 @@ using SpikeCore.Data.Models;
 
 namespace SpikeCore.Data
 {
-    public class SpikeCoreUserStore : UserStore<SpikeCoreUser, IdentityRole, SpikeCoreDbContext, string, IdentityUserClaim<string>, IdentityUserRole<string>, IdentityUserLogin<string>, IdentityUserToken<string>, IdentityRoleClaim<string>>
+    public class SpikeCoreUserStore : UserStore<SpikeCoreUser, IdentityRole, SpikeCoreDbContext, string, IdentityUserClaim<string>, IdentityUserRole<string>, SpikeCoreUserLogin, IdentityUserToken<string>, IdentityRoleClaim<string>>
     {
         public SpikeCoreUserStore(SpikeCoreDbContext context, IdentityErrorDescriber describer = null)
             : base(context, describer) { }

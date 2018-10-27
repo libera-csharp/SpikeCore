@@ -28,16 +28,19 @@ namespace SpikeCore.Data
                     return directMatchUser;
 
                 var startsWithLogin = await base.Context
-                    .Set<IdentityUserLogin<string>>()
-                    .Where(ul => ul.LoginProvider == "IrcHost|StartsWith" && providerKey.StartsWith(ul.ProviderKey))
+                    .Set<SpikeCoreUserLogin>()
+                    .Where(ul => ul.LoginProvider == loginProvider && ul.MetaData == "StartsWith" && providerKey.StartsWith(ul.ProviderKey))
                     .FirstOrDefaultAsync();
 
-                var startsWithUser = await base.Context
-                    .Set<SpikeCoreUser>()
-                    .SingleAsync(u => u.Id.Equals(startsWithLogin.UserId));
+                if (startsWithLogin != null)
+                {
+                    var startsWithUser = await base.Context
+                        .Set<SpikeCoreUser>()
+                        .SingleAsync(u => u.Id.Equals(startsWithLogin.UserId));
 
-                if (startsWithUser != null)
-                    return startsWithUser;
+                    if (startsWithUser != null)
+                        return startsWithUser;
+                }
 
                 return null;
             }

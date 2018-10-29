@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 using SpikeCore.Data.Models;
 
 namespace SpikeCore.Data
 {
-    public class SpikeCoreDbContext : IdentityDbContext<SpikeCoreUser>
+    public class SpikeCoreDbContext : IdentityDbContext<SpikeCoreUser, IdentityRole, string, IdentityUserClaim<string>, IdentityUserRole<string>, SpikeCoreUserLogin, IdentityRoleClaim<string>, IdentityUserToken<string>>
     {
         public DbSet<KarmaItem> Karma { get; set; }
         public DbSet<Factoid> Factoids { get; set; }

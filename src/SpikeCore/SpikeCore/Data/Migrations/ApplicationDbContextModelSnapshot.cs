@@ -212,7 +212,7 @@ namespace SpikeCore.Data.Migrations
 
                     b.Property<string>("ProviderKey");
 
-                    b.Property<string>("MetaData");
+                    b.Property<string>("MatchType");
 
                     b.Property<string>("ProviderDisplayName");
 

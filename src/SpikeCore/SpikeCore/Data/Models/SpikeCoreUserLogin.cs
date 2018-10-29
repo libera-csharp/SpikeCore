@@ -4,6 +4,6 @@ namespace SpikeCore.Data.Models
 {
     public class SpikeCoreUserLogin : IdentityUserLogin<string>
     {
-        public string MetaData { get; set; }
+        public string MatchType { get; set; }
     }
 }

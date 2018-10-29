@@ -15,10 +15,10 @@ namespace SpikeCore.Data
         public SpikeCoreUserStore(SpikeCoreDbContext context, IdentityErrorDescriber describer = null)
             : base(context, describer) { }
 
-        // HACK - Ideally this would be a seperate method called something like FindByHostMaskAsync
-        // Unfortunatly I couldn't get that exposed in a way that worked with asp.net core identity.
+        // HACK - Ideally this would be a separate method called something like FindByHostMaskAsync
+        // Unfortunately I couldn't get that exposed in a way that worked with asp.net core identity.
         // So this is the resulting hack...
-        public async override Task<SpikeCoreUser> FindByLoginAsync(string loginProvider, string providerKey, CancellationToken cancellationToken = default)
+        public override async Task<SpikeCoreUser> FindByLoginAsync(string loginProvider, string providerKey, CancellationToken cancellationToken = default)
         {
             if (loginProvider.Equals("IrcHost"))
             {
@@ -29,14 +29,14 @@ namespace SpikeCore.Data
 
                 var startsWithLogin = await base.Context
                     .Set<SpikeCoreUserLogin>()
-                    .Where(ul => ul.LoginProvider == loginProvider && ul.MetaData == "StartsWith" && providerKey.StartsWith(ul.ProviderKey))
-                    .FirstOrDefaultAsync();
+                    .Where(ul => ul.LoginProvider == loginProvider && ul.MatchType == "StartsWith" && providerKey.StartsWith(ul.ProviderKey))
+                    .FirstOrDefaultAsync(cancellationToken);
 
                 if (startsWithLogin != null)
                 {
                     var startsWithUser = await base.Context
                         .Set<SpikeCoreUser>()
-                        .SingleAsync(u => u.Id.Equals(startsWithLogin.UserId));
+                        .SingleAsync(u => u.Id.Equals(startsWithLogin.UserId), cancellationToken);
 
                     if (startsWithUser != null)
                         return startsWithUser;

@@ -49,15 +49,13 @@ namespace SpikeCore.Irc
         {
             _ircClient.ChannelMessageReceived = async (channelMessage) =>
             {
-                var user = await _userManager.FindByLoginAsync("IrcHost", channelMessage.UserHostName);
-                
                 var ircChannelMessageMessage = new IrcChannelMessageMessage()
                 {
                     ChannelName = channelMessage.ChannelName,
                     UserName = channelMessage.UserName,
                     UserHostName = channelMessage.UserHostName,
                     Text = channelMessage.Text,
-                    IdentityUser = user
+                    IdentityUser = await FindSpikeCoreUser(channelMessage)
                 };
 
                 await _messageBus.PublishAsync(ircChannelMessageMessage);
@@ -66,6 +64,18 @@ namespace SpikeCore.Irc
             _ircClient.MessageReceived = (receivedMessage) => _messageBus.PublishAsync(new IrcReceiveMessage(receivedMessage));
 
             _ircClient.Connect(_config.Host, _config.Port, _config.Nickname, _config.Channels, _config.Authenticate, _config.Password);
+        }
+
+        private async Task<SpikeCoreUser> FindSpikeCoreUser(ChannelMessage channelMessage)
+        {
+            var user = await _userManager.FindByLoginAsync("IrcHost", channelMessage.UserHostName);
+
+            if (null != user)
+            {
+                user.Roles = await _userManager.GetRolesAsync(user);
+            }
+
+            return user;
         }
     }
 }

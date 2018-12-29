@@ -23,9 +23,9 @@ namespace SpikeCore.Modules
             _context = context;
         }
         
-        protected override async Task HandleMessageAsyncInternal(IrcChannelMessageMessage message, CancellationToken cancellationToken)
+        protected override async Task HandleMessageAsyncInternal(IrcPrivMessage request, CancellationToken cancellationToken)
         {
-            var match = KarmaRegex.Match(message.Text);
+            var match = KarmaRegex.Match(request.Text);
 
             if (match.Success)
             {
@@ -36,7 +36,7 @@ namespace SpikeCore.Modules
                                .SingleOrDefault(k => k.Name.Equals(nick, StringComparison.CurrentCultureIgnoreCase)) ?? new KarmaItem { Name = nick, Karma = 0 };
 
                 // Ignore anyone tweaking their own karma.
-                if (string.IsNullOrEmpty(op) ||!nick.Equals(message.UserName, StringComparison.InvariantCultureIgnoreCase))
+                if (string.IsNullOrEmpty(op) ||!nick.Equals(request.UserName, StringComparison.InvariantCultureIgnoreCase))
                 {
                     if (op.Equals("--"))
                     {
@@ -48,7 +48,7 @@ namespace SpikeCore.Modules
                     }
                     
                     await SaveOrUpdate(user, cancellationToken);            
-                    await SendMessageToChannel(message.ChannelName, $"{user.Name} has a karma of {user.Karma}");   
+                    await SendResponse(request, $"{user.Name} has a karma of {user.Karma}");   
                 }                  
             }
         }

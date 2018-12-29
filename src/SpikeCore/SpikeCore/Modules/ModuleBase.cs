@@ -10,7 +10,7 @@ using SpikeCore.MessageBus;
 
 namespace SpikeCore.Modules
 {
-    public abstract class ModuleBase : IMessageHandler<IrcChannelMessageMessage>, IModule
+    public abstract class ModuleBase : IMessageHandler<IrcPrivMessage>, IModule
     {
         public abstract string Name { get; }
         public abstract string Description { get; }
@@ -22,7 +22,7 @@ namespace SpikeCore.Modules
         public ModuleConfiguration Configuration { private get; set; }
 
         // TODO [Kog 10/06/2018] : work in access checks etc.
-        public Task HandleMessageAsync(IrcChannelMessageMessage message, CancellationToken cancellationToken)
+        public Task HandleMessageAsync(IrcPrivMessage message, CancellationToken cancellationToken)
         {
             return Triggers.Any(trigger =>
                 message.Text.StartsWith(Configuration.TriggerPrefix + trigger,
@@ -31,16 +31,31 @@ namespace SpikeCore.Modules
                 : Task.CompletedTask;
         }
 
-
-        protected abstract Task HandleMessageAsyncInternal(IrcChannelMessageMessage message,
+        protected abstract Task HandleMessageAsyncInternal(IrcPrivMessage request,
             CancellationToken cancellationToken);
 
+        protected Task SendResponse(IrcPrivMessage request, string message)
+        {
+            return request.Private ? SendMessageToNick(request.UserName, message) : SendMessageToChannel(request.ChannelName, message);
+        }
+
+        protected Task SendResponse(IrcPrivMessage request, IEnumerable<string> messages)
+        {
+            return request.Private ? SendMessagesToNick(request.UserName, messages) : SendMessagesToChannel(request.ChannelName, messages);
+        }
+        
         protected Task SendMessageToChannel(string channelName, string message)
             => MessageBus.PublishAsync(new IrcSendChannelMessage(channelName, message));
 
         protected Task SendMessagesToChannel(string channelName, IEnumerable<string> messages)
             => MessageBus.PublishAsync(new IrcSendChannelMessage(channelName, messages));
 
+        protected Task SendMessageToNick(string nick, string message)
+            => MessageBus.PublishAsync(new IrcSendPrivateMessage(nick, message));
+        
+        protected Task SendMessagesToNick(string nick, IEnumerable<string> messages)
+            => MessageBus.PublishAsync(new IrcSendPrivateMessage(nick, messages));
+        
         protected virtual bool AccessAllowed(SpikeCoreUser user)
         {
             // By default a command can be run by any known user with at least one role.

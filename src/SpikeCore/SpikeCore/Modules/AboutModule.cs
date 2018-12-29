@@ -15,9 +15,9 @@ namespace SpikeCore.Modules
         private string[] _taglines => new[] {"now in stereo!", "with Smell-O-Vision!", "filmed in technicolor!"};
         private readonly Random _random = new Random();
 
-        protected override async Task HandleMessageAsyncInternal(IrcChannelMessageMessage message, CancellationToken cancellationToken)
+        protected override async Task HandleMessageAsyncInternal(IrcPrivMessage request, CancellationToken cancellationToken)
         {
-            await SendMessageToChannel(message.ChannelName, "SpikeCore: " + _taglines[_random.Next(0, _taglines.Length)]);
+            await SendResponse(request, "SpikeCore: " + _taglines[_random.Next(0, _taglines.Length)]);
         }
     }
 }

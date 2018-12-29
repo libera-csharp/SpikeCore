@@ -27,9 +27,9 @@ namespace SpikeCore.Modules
             _context = context;
         }
 
-        protected override async Task HandleMessageAsyncInternal(IrcChannelMessageMessage message, CancellationToken cancellationToken)
+        protected override async Task HandleMessageAsyncInternal(IrcPrivMessage request, CancellationToken cancellationToken)
         {
-            var match = FactoidRegex.Match(message.Text);
+            var match = FactoidRegex.Match(request.Text);
 
             if (match.Success)
             {
@@ -45,12 +45,12 @@ namespace SpikeCore.Modules
                         Description = description,
                         Type = command,
                         CreationDate = DateTime.UtcNow,
-                        CreatedBy = message.UserName,
+                        CreatedBy = request.UserName,
                         Name = name
                     };
 
                     await SaveOrUpdate(factoid, cancellationToken);
-                    await SendMessageToChannel(message.ChannelName, "Factoid saved.");
+                    await SendResponse(request, "Factoid saved.");
                 }
 
                 // Otherwise we're looking up factoids by name/type.
@@ -83,12 +83,11 @@ namespace SpikeCore.Modules
                         var response =
                             $"Found {count} factoid{pluralization} of type {command}{paginationDisplay} for {name}: {factoidDisplay}";
 
-                        await SendMessageToChannel(message.ChannelName, response);
+                        await SendResponse(request, response);
                     }
                     else
                     {
-                        await SendMessageToChannel(message.ChannelName,
-                            $"No factoids for {name} of type {command}");
+                        await SendResponse(request, $"No factoids for {name} of type {command}");
                     }
                 }
             }

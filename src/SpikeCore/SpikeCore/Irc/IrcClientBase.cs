@@ -10,7 +10,7 @@ namespace SpikeCore.Irc
         protected string _password;
 
         public virtual Action<string> MessageReceived { get; set; }
-        public virtual Action<ChannelMessage> ChannelMessageReceived { get; set; }
+        public virtual Action<PrivMessage> PrivMessageReceived { get; set; }
 
         public virtual void Connect(string host, int port, string nickname, IEnumerable<string> channelsToJoin, bool authenticate, string password)
         {            
@@ -39,6 +39,7 @@ namespace SpikeCore.Irc
         }
         
         public abstract void SendChannelMessage(string channelName, string message);
+        public abstract void SendPrivateMessage(string nick, string message);
         public abstract void JoinChannel(string channelName);
     }
 }

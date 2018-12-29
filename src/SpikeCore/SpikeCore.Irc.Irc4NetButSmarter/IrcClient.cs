@@ -16,7 +16,8 @@ namespace SpikeCore.Irc.Irc4NetButSmarter
             _ircClient = new SIRC4N.IrcClient();
             _ircClient.OnRawMessage += _ircClient_OnRawMessage;
             _ircClient.OnRegistered += _ircClient_OnRegistered;
-            _ircClient.OnChannelMessage += _ircClient_OnChannelMessage;
+            _ircClient.OnChannelMessage += _ircClient_OnPrivmsg;
+            _ircClient.OnQueryMessage += _ircClient_OnPrivmsg;
             _ircClient.OnQueryNotice += _ircClient_OnQueryNotice;
 
             base.Connect(host, port, nickname, channelsToJoin, authenticate, password);
@@ -45,8 +46,8 @@ namespace SpikeCore.Irc.Irc4NetButSmarter
         private void _ircClient_OnRawMessage(object sender, SIRC4N.IrcEventArgs e)
             => MessageReceived?.Invoke($"RAW: {e.Data.RawMessage}");
 
-        private void _ircClient_OnChannelMessage(object sender, SIRC4N.IrcEventArgs e)
-            => ChannelMessageReceived?.Invoke(new ChannelMessage()
+        private void _ircClient_OnPrivmsg(object sender, SIRC4N.IrcEventArgs e)
+            => PrivMessageReceived?.Invoke(new PrivMessage()
             {
                 ChannelName = e.Data.Channel,
                 Text = e.Data.Message,
@@ -64,7 +65,10 @@ namespace SpikeCore.Irc.Irc4NetButSmarter
         
         public override void SendChannelMessage(string channelName, string message)
             => _ircClient.SendMessage(SIRC4N.SendType.Message, channelName, message);
-        
+
+        public override void SendPrivateMessage(string nick, string message)
+            => _ircClient.SendMessage(SIRC4N.SendType.Message, nick, message);
+
         public override void JoinChannel(string channelName) 
             => _ircClient.RfcJoin(channelName);        
     }

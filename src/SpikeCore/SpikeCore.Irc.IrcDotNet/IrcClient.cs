@@ -33,23 +33,24 @@ namespace SpikeCore.Irc.IrcDotNet
             _ircClient.LocalUser.JoinedChannel += LocalUser_JoinedChannel;
             _ircClient.LocalUser.LeftChannel += LocalUser_LeftChannel;
             _ircClient.LocalUser.NoticeReceived += LocalUser_NoticeReceived;
+            _ircClient.LocalUser.MessageReceived += Privmsg_MessageReceived;
         }
 
         private void LocalUser_JoinedChannel(object sender, IrcChannelEventArgs e)
-            => e.Channel.MessageReceived += Channel_MessageReceived;
+            => e.Channel.MessageReceived += Privmsg_MessageReceived;
 
         private void LocalUser_LeftChannel(object sender, IrcChannelEventArgs e)
-            => e.Channel.MessageReceived -= Channel_MessageReceived;
+            => e.Channel.MessageReceived -= Privmsg_MessageReceived;
 
-        private void Channel_MessageReceived(object sender, IrcMessageEventArgs e)
+        private void Privmsg_MessageReceived(object sender, IrcMessageEventArgs e)
         {
-            var ircChannel = (IrcChannel)sender;
+            var ircChannel = sender as IrcChannel;
 
-            if (ircChannel != null && e.Source is IrcUser ircUser)
+            if (e.Source is IrcUser ircUser)
             {
-                ChannelMessageReceived?.Invoke(new ChannelMessage()
+                PrivMessageReceived?.Invoke(new PrivMessage()
                 {
-                    ChannelName = ircChannel.Name,
+                    ChannelName = ircChannel?.Name,
                     UserName = ircUser.NickName,
                     UserHostName = ircUser.HostName,
                     Text = e.Text
@@ -94,7 +95,10 @@ namespace SpikeCore.Irc.IrcDotNet
         
         public override void SendChannelMessage(string channelName, string message)
             => _ircClient.LocalUser.SendMessage(channelName, message);
-        
+
+        public override void SendPrivateMessage(string nick, string message) 
+            => _ircClient.LocalUser.SendMessage(nick, message);
+
         public override void JoinChannel(string channelName) 
             => _ircClient.Channels.Join(channelName);    
     }

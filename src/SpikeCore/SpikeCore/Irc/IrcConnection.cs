@@ -11,7 +11,7 @@ using SpikeCore.MessageBus;
 
 namespace SpikeCore.Irc
 {
-    public class IrcConnection : IIrcConnection, IMessageHandler<IrcConnectMessage>, IMessageHandler<IrcSendChannelMessage>
+    public class IrcConnection : IIrcConnection, IMessageHandler<IrcConnectMessage>, IMessageHandler<IrcSendChannelMessage>, IMessageHandler<IrcSendPrivateMessage>
     {
         private readonly IIrcClient _ircClient;
         private readonly IMessageBus _messageBus;
@@ -45,11 +45,21 @@ namespace SpikeCore.Irc
             return Task.CompletedTask;
         }
 
+        public Task HandleMessageAsync(IrcSendPrivateMessage ircSendPrivateMessage, CancellationToken cancellationToken)
+        {
+            foreach (var message in ircSendPrivateMessage.Messages)
+            {
+                _ircClient.SendPrivateMessage(ircSendPrivateMessage.Nick, message);
+            }
+
+            return Task.CompletedTask;
+        }
+
         private void Connect()
         {
-            _ircClient.ChannelMessageReceived = async (channelMessage) =>
+            _ircClient.PrivMessageReceived = async (channelMessage) =>
             {
-                var ircChannelMessageMessage = new IrcChannelMessageMessage()
+                var message = new IrcPrivMessage()
                 {
                     ChannelName = channelMessage.ChannelName,
                     UserName = channelMessage.UserName,
@@ -58,7 +68,7 @@ namespace SpikeCore.Irc
                     IdentityUser = await FindSpikeCoreUser(channelMessage)
                 };
 
-                await _messageBus.PublishAsync(ircChannelMessageMessage);
+                await _messageBus.PublishAsync(message);
             };
 
             _ircClient.MessageReceived = (receivedMessage) => _messageBus.PublishAsync(new IrcReceiveMessage(receivedMessage));
@@ -66,9 +76,9 @@ namespace SpikeCore.Irc
             _ircClient.Connect(_config.Host, _config.Port, _config.Nickname, _config.Channels, _config.Authenticate, _config.Password);
         }
 
-        private async Task<SpikeCoreUser> FindSpikeCoreUser(ChannelMessage channelMessage)
+        private async Task<SpikeCoreUser> FindSpikeCoreUser(PrivMessage privMessage)
         {
-            var user = await _userManager.FindByLoginAsync("IrcHost", channelMessage.UserHostName);
+            var user = await _userManager.FindByLoginAsync("IrcHost", privMessage.UserHostName);
 
             if (null != user)
             {

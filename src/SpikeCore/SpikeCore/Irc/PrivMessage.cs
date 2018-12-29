@@ -1,6 +1,6 @@
 ﻿namespace SpikeCore.Irc
 {
-    public class ChannelMessage
+    public class PrivMessage
     {
         public string ChannelName { get; set; }
         public string UserName { get; set; }

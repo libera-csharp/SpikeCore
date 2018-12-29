@@ -22,13 +22,13 @@ namespace SpikeCore.Modules
             _modules = modules;
         }
 
-        protected override Task HandleMessageAsyncInternal(IrcChannelMessageMessage message, CancellationToken cancellationToken)
+        protected override Task HandleMessageAsyncInternal(IrcPrivMessage request, CancellationToken cancellationToken)
         {
-            var splitMessage = message.Text.Split(" ");
-            return splitMessage.Length <= 1 ? GetModules(message.ChannelName) : GetHelpForModule(message.ChannelName, splitMessage[1]);
+            var splitMessage = request.Text.Split(" ");
+            return splitMessage.Length <= 1 ? GetModules(request) : GetHelpForModule(request, splitMessage[1]);
         }
 
-        private Task GetHelpForModule(string channelName, string moduleName)
+        private Task GetHelpForModule(IrcPrivMessage request, string moduleName)
         {
             var module = _modules.Value.FirstOrDefault(x => x.Name.Equals(moduleName, StringComparison.InvariantCultureIgnoreCase));
 
@@ -41,15 +41,15 @@ namespace SpikeCore.Modules
                     "Module Instructions: " + module.Instructions
                 };
                 
-                return SendMessagesToChannel(channelName, response);
+                return SendMessagesToNick(request.UserName, response);
             }
 
-            return SendMessageToChannel(channelName, "No such module exists, please try another.");
+            return SendMessageToNick(request.UserName, "No such module exists, please try another.");
         }
 
-        private Task GetModules(string channelName)
+        private Task GetModules(IrcPrivMessage request)
         {
-            return SendMessageToChannel(channelName, "Modules list: " + string.Join(", ", _modules.Value.Select(module => module.Name).ToList()));
+            return SendMessageToNick(request.UserName, "Modules list: " + string.Join(", ", _modules.Value.Select(module => module.Name).ToList()));
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using SpikeCore.Domain;
 
 namespace SpikeCore.Irc
 {
@@ -8,6 +9,7 @@ namespace SpikeCore.Irc
         private IEnumerable<string> _channelsToJoin;
         protected bool _authenticate;
         protected string _password;
+        public WebHostCancellationTokenHolder WebHostCancellationTokenHolder { protected get; set; }
 
         public virtual Action<string> MessageReceived { get; set; }
         public virtual Action<PrivMessage> PrivMessageReceived { get; set; }
@@ -41,5 +43,7 @@ namespace SpikeCore.Irc
         public abstract void SendChannelMessage(string channelName, string message);
         public abstract void SendPrivateMessage(string nick, string message);
         public abstract void JoinChannel(string channelName);
+        public abstract void PartChannel(string channelName, string reason);
+        public abstract void Quit(string quitMessage);
     }
 }

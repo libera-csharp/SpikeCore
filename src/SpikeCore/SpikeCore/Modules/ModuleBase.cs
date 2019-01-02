@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Foundatio.Messaging;
 using SpikeCore.Data.Models;
-using SpikeCore.Irc;
 using SpikeCore.Irc.Configuration;
 using SpikeCore.MessageBus;
 
@@ -19,12 +18,9 @@ namespace SpikeCore.Modules
 
         public virtual IEnumerable<string> Triggers => new List<string> {Name};
 
-        public IMessageBus MessageBus { private get; set; }
+        public IMessageBus MessageBus { protected get; set; }
         public ModuleConfiguration Configuration { private get; set; }
-
-        public IIrcClient IrcClient { protected get; set; }
         
-        // TODO [Kog 10/06/2018] : work in access checks etc.
         public Task HandleMessageAsync(IrcPrivMessage message, CancellationToken cancellationToken)
         {
             return Triggers.Any(trigger =>

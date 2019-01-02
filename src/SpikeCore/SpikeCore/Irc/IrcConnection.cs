@@ -11,7 +11,8 @@ using SpikeCore.MessageBus;
 
 namespace SpikeCore.Irc
 {
-    public class IrcConnection : IIrcConnection, IMessageHandler<IrcConnectMessage>, IMessageHandler<IrcSendChannelMessage>, IMessageHandler<IrcSendPrivateMessage>
+    public class IrcConnection : IIrcConnection, IMessageHandler<IrcConnectMessage>, IMessageHandler<IrcSendChannelMessage>, 
+        IMessageHandler<IrcSendPrivateMessage>, IMessageHandler<IrcJoinChannelMessage>, IMessageHandler<IrcPartChannelMessage>, IMessageHandler<IrcQuitMessage>
     {
         private readonly IIrcClient _ircClient;
         private readonly IMessageBus _messageBus;
@@ -86,6 +87,24 @@ namespace SpikeCore.Irc
             }
 
             return user;
+        }
+
+        public Task HandleMessageAsync(IrcJoinChannelMessage message, CancellationToken cancellationToken)
+        {
+            _ircClient.JoinChannel(message.Channel);
+            return Task.CompletedTask;
+        }
+
+        public Task HandleMessageAsync(IrcPartChannelMessage message, CancellationToken cancellationToken)
+        {
+            _ircClient.PartChannel(message.Channel, message.Reason);
+            return Task.CompletedTask;
+        }
+
+        public Task HandleMessageAsync(IrcQuitMessage message, CancellationToken cancellationToken)
+        {
+            _ircClient.Quit(message.Reason);
+            return Task.CompletedTask;
         }
     }
 }

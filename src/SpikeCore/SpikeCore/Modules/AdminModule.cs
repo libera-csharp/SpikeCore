@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Foundatio.Messaging;
 using SpikeCore.Data.Models;
 using SpikeCore.MessageBus;
 
@@ -34,12 +35,12 @@ namespace SpikeCore.Modules
 
                 if (command.Equals("quit", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    IrcClient.Quit(details);
+                    return MessageBus.PublishAsync(new IrcQuitMessage(details));
                 }
                 
                 if (command.Equals("join", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    IrcClient.JoinChannel(details);
+                    return MessageBus.PublishAsync(new IrcJoinChannelMessage(details));
                 }
 
                 if (command.Equals("part", StringComparison.InvariantCultureIgnoreCase))
@@ -47,7 +48,7 @@ namespace SpikeCore.Modules
                     var partMatch = PartRegex.Match(details);
                     if (partMatch.Success)
                     {
-                        IrcClient.PartChannel(partMatch.Groups[1].Value, partMatch.Groups[2].Value);
+                        return MessageBus.PublishAsync(new IrcPartChannelMessage(partMatch.Groups[1].Value,partMatch.Groups[2].Value));
                     }
                 }
             }

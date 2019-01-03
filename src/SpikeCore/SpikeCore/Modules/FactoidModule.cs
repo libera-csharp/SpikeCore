@@ -71,13 +71,12 @@ namespace SpikeCore.Modules
                         var pluralization = (count == 1) ? string.Empty : "s";
 
                         var paginationDisplay = (count > FactDisplayCount)
-                            ? string.Format(" (showing the first {0})", Math.Min(count, FactDisplayCount))
+                            ? $" (showing the first {Math.Min(count, FactDisplayCount)})"
                             : string.Empty;
                         
                         var factoidDisplay = matchingFactoids
                             .Take(FactDisplayCount)
-                            .Select(x => string.Format("[{0} at {1} by {2}]", x.Description,
-                                x.CreationDate.ToString("MM/dd/yyyy H:mm:ss UTC"), x.CreatedBy))
+                            .Select(x => $"[{x.Description} at {x.CreationDate:MM/dd/yyyy H:mm:ss UTC} by {x.CreatedBy}]")
                             .Join();
 
                         var response =

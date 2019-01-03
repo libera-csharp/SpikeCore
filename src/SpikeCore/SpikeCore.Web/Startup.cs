@@ -98,6 +98,7 @@ namespace SpikeCore.Web
             containerBuilder
                 .RegisterType<IrcClient>()
                 .As<IIrcClient>()
+                .PropertiesAutowired()
                 .SingleInstance();
             
             containerBuilder

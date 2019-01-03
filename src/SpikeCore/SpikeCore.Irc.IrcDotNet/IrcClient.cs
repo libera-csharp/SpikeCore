@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-
 using IrcDotNet;
 
 namespace SpikeCore.Irc.IrcDotNet
@@ -100,6 +99,15 @@ namespace SpikeCore.Irc.IrcDotNet
             => _ircClient.LocalUser.SendMessage(nick, message);
 
         public override void JoinChannel(string channelName) 
-            => _ircClient.Channels.Join(channelName);    
+            => _ircClient.Channels.Join(channelName);
+
+        public override void PartChannel(string channelName, string reason)
+            => _ircClient.Channels.Leave(new[] {channelName}, reason ?? "leaving...");
+
+        public override void Quit(string quitMessage)
+        {
+            _ircClient.Quit(quitMessage ?? "Quitting...");
+            WebHostCancellationTokenHolder.CancellationTokenSource.Cancel();
+        }
     }
 }

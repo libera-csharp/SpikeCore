@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+using SpikeCore.Domain;
 
 namespace SpikeCore.Web
 {
@@ -11,12 +13,17 @@ namespace SpikeCore.Web
     {
         public static async Task Main(string[] args)
         {
+            var cancellationTokenSource = new CancellationTokenSource();
+            var tokenHolder = new WebHostCancellationTokenHolder(cancellationTokenSource);
+            
             var webHost = WebHost
                 .CreateDefaultBuilder(args)
+                .ConfigureServices(servicesCollection =>
+                {
+                    servicesCollection.AddSingleton(tokenHolder);
+                })
                 .UseStartup<Startup>()
                 .Build();
-
-            var cancellationTokenSource = new CancellationTokenSource();
 
             Console.CancelKeyPress += (sender, eventArgs) =>
             {

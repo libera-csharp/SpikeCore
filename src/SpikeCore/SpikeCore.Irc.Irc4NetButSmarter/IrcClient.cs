@@ -70,6 +70,16 @@ namespace SpikeCore.Irc.Irc4NetButSmarter
             => _ircClient.SendMessage(SIRC4N.SendType.Message, nick, message);
 
         public override void JoinChannel(string channelName) 
-            => _ircClient.RfcJoin(channelName);        
+            => _ircClient.RfcJoin(channelName);
+
+        public override void PartChannel(string channelName, string reason)
+            => _ircClient.RfcPart(channelName, reason);
+        
+
+        public override void Quit(string quitMessage)
+        {
+            _ircClient.RfcQuit(quitMessage ?? "Quitting...");
+            WebHostCancellationTokenHolder.CancellationTokenSource.Cancel();
+        }
     }
 }

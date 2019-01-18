@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using IrcDotNet;
 
 namespace SpikeCore.Irc.IrcDotNet
@@ -8,10 +7,10 @@ namespace SpikeCore.Irc.IrcDotNet
     {
         private StandardIrcClient _ircClient;
 
-        public override void Connect(string host, int port, string nickname, IEnumerable<string> channelsToJoin, bool authenticate, string password)
-        {
-            base.Connect(host, port, nickname, channelsToJoin, authenticate, password);
+        public override bool IsConnected => _ircClient != null && _ircClient.IsConnected;
 
+        protected override void Connect()
+        {
             _ircClient = new StandardIrcClient();
             _ircClient.RawMessageReceived += IrcClient_RawMessageReceived;
 
@@ -19,13 +18,27 @@ namespace SpikeCore.Irc.IrcDotNet
             _ircClient.ConnectFailed += IrcClient_ConnectFailed;
             _ircClient.Registered += _ircClient_Registered;
 
-            _ircClient.Connect(host, port, false, new IrcUserRegistrationInfo()
+            _ircClient.Connect(_host, _port, false, new IrcUserRegistrationInfo()
             {
-                NickName = nickname,
-                RealName = nickname,
-                UserName = nickname,
+                NickName = _nickname,
+                RealName = _nickname,
+                UserName = _nickname,
             });
+            
+            _ircClient.Disconnected += HandleDisconnect;
         }
+        
+        protected override void UnwireEvents()
+        {
+            _ircClient.LocalUser.JoinedChannel -= LocalUser_JoinedChannel;
+            _ircClient.LocalUser.LeftChannel -= LocalUser_LeftChannel;
+            _ircClient.LocalUser.MessageReceived -= Privmsg_MessageReceived;
+            _ircClient.Registered -= _ircClient_Registered;
+            _ircClient.LocalUser.NoticeReceived -= LocalUser_NoticeReceived;
+            _ircClient.RawMessageReceived -= IrcClient_RawMessageReceived;
+            _ircClient.Disconnected -= HandleDisconnect;
+        }
+
 
         private void _ircClient_Registered(object sender, EventArgs e)
         {
@@ -106,6 +119,8 @@ namespace SpikeCore.Irc.IrcDotNet
 
         public override void Quit(string quitMessage)
         {
+            _userInitiatedDisconnect = true;
+            
             _ircClient.Quit(quitMessage ?? "Quitting...");
             WebHostCancellationTokenHolder.CancellationTokenSource.Cancel();
         }

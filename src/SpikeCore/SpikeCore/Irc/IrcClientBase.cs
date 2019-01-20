@@ -8,12 +8,14 @@ namespace SpikeCore.Irc
     public abstract class IrcClientBase: IIrcClient
     {
         private IEnumerable<string> _channelsToJoin;
+        private bool _userInitiatedDisconnect;
+        private readonly SemaphoreSlim _reconnectionSemaphore = new SemaphoreSlim(0);
+
         protected string _host;
         protected int _port;
         protected string _nickname;
         protected bool _authenticate;
         protected string _password;
-        protected bool _userInitiatedDisconnect;
         
         public WebHostCancellationTokenHolder WebHostCancellationTokenHolder { protected get; set; }
         public virtual Action<string> MessageReceived { get; set; }
@@ -37,19 +39,21 @@ namespace SpikeCore.Irc
         {      
             UnwireEvents();
             
-            if (!_userInitiatedDisconnect)
+            while (!_userInitiatedDisconnect && !IsConnected)
             {
-                while (!IsConnected)
-                {
-                    Connect();
+                // TODO - [kog@epiphanic.org 01/20/2019]: Add real logging.
+                Console.WriteLine("Disconnected from IRC server, attempting reconnection...");
+                Connect();
 
-                    if (!IsConnected)
-                    {
-                        // TODO - [kog@epiphanic.org 01/17/2019]: replace with a max retries + exponential backoff
-                        Thread.Sleep(30000);
-                    }
+                if (!IsConnected)
+                {
+                    // TODO - [kog@epiphanic.org 01/17/2019]: replace with a max retries + exponential backoff
+                    Console.WriteLine("Failed to reconnect. Retrying in 30 seconds...");
+                    _reconnectionSemaphore.Wait(TimeSpan.FromSeconds(30));
                 }
             }
+            
+            Console.WriteLine("Reconnected successfully.");
         }
 
         protected static bool NoticeIsExpectedServicesAgentMessage(string nickname, string notice)
@@ -71,11 +75,19 @@ namespace SpikeCore.Irc
             }
         }
         
+        public virtual void Quit(string quitMessage)
+        {
+            // Prevent endless loops in our reconnect logic.
+            _userInitiatedDisconnect = true;
+            
+            // In the event that we're waiting on a retry while quitting, try and short circuit the process.
+            _reconnectionSemaphore.Release();
+        }
+        
         public abstract void SendChannelMessage(string channelName, string message);
         public abstract void SendPrivateMessage(string nick, string message);
         public abstract void JoinChannel(string channelName);
-        public abstract void PartChannel(string channelName, string reason);
-        public abstract void Quit(string quitMessage);
+        public abstract void PartChannel(string channelName, string reason);        
         protected abstract void UnwireEvents();
         protected abstract void Connect();
     }

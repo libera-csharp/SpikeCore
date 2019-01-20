@@ -89,7 +89,7 @@ namespace SpikeCore.Irc.Irc4NetButSmarter
 
         public override void Quit(string quitMessage)
         {
-            _userInitiatedDisconnect = true;
+            base.Quit(quitMessage);
             
             _ircClient.RfcQuit(quitMessage ?? "Quitting...");
             WebHostCancellationTokenHolder.CancellationTokenSource.Cancel();

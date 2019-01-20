@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading;
 
 using SIRC4N = Meebey.SmartIrc4net;
@@ -10,8 +9,10 @@ namespace SpikeCore.Irc.Irc4NetButSmarter
     {
         private SIRC4N.IrcClient _ircClient = new SIRC4N.IrcClient();
         private Thread _listenThread;
+        
+        public override bool IsConnected => _ircClient.IsConnected;
 
-        public override void Connect(string host, int port, string nickname, IEnumerable<string> channelsToJoin, bool authenticate, string password)
+        protected override void Connect()
         {
             _ircClient = new SIRC4N.IrcClient();
             _ircClient.OnRawMessage += _ircClient_OnRawMessage;
@@ -19,16 +20,26 @@ namespace SpikeCore.Irc.Irc4NetButSmarter
             _ircClient.OnChannelMessage += _ircClient_OnPrivmsg;
             _ircClient.OnQueryMessage += _ircClient_OnPrivmsg;
             _ircClient.OnQueryNotice += _ircClient_OnQueryNotice;
-
-            base.Connect(host, port, nickname, channelsToJoin, authenticate, password);
-
-            _ircClient.Connect(host, port);
-            _ircClient.Login(nickname, nickname);
+            
+            _ircClient.Connect(_host, _port);
+            _ircClient.Login(_nickname, _nickname);
 
             _listenThread = new Thread(_ircClient.Listen);
             _listenThread.Start();
+            
+            _ircClient.OnDisconnected += HandleDisconnect;
         }
 
+        protected override void UnwireEvents()
+        {
+            _ircClient.OnDisconnected -= HandleDisconnect;
+            _ircClient.OnRawMessage += _ircClient_OnRawMessage;
+            _ircClient.OnRegistered += _ircClient_OnRegistered;
+            _ircClient.OnChannelMessage += _ircClient_OnPrivmsg;
+            _ircClient.OnQueryMessage += _ircClient_OnPrivmsg;
+            _ircClient.OnQueryNotice += _ircClient_OnQueryNotice;
+        }
+        
         private void _ircClient_OnRegistered(object sender, EventArgs e)
         {
             if (_authenticate)
@@ -78,6 +89,8 @@ namespace SpikeCore.Irc.Irc4NetButSmarter
 
         public override void Quit(string quitMessage)
         {
+            base.Quit(quitMessage);
+            
             _ircClient.RfcQuit(quitMessage ?? "Quitting...");
             WebHostCancellationTokenHolder.CancellationTokenSource.Cancel();
         }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using Serilog;
 using SpikeCore.Domain;
 
 namespace SpikeCore.Irc
@@ -41,19 +42,18 @@ namespace SpikeCore.Irc
             
             while (!_userInitiatedDisconnect && !IsConnected)
             {
-                // TODO - [kog@epiphanic.org 01/20/2019]: Add real logging.
-                Console.WriteLine("Disconnected from IRC server, attempting reconnection...");
+                Log.Warning("Disconnected from IRC server, attempting reconnection...");
                 Connect();
 
                 if (!IsConnected)
                 {
                     // TODO - [kog@epiphanic.org 01/17/2019]: replace with a max retries + exponential backoff
-                    Console.WriteLine("Failed to reconnect. Retrying in 30 seconds...");
+                    Log.Warning("Failed to reconnect. Retrying in 30 seconds...");
                     _reconnectionSemaphore.Wait(TimeSpan.FromSeconds(30));
                 }
             }
             
-            Console.WriteLine("Reconnected successfully.");
+            Log.Information("Reconnected successfully.");
         }
 
         protected static bool NoticeIsExpectedServicesAgentMessage(string nickname, string notice)

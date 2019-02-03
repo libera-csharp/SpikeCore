@@ -74,6 +74,8 @@ namespace SpikeCore.Web
                     .AddMvc()
                     .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             }
+            
+            services.AddHttpClient();
 
             var containerBuilder = new ContainerBuilder();
 

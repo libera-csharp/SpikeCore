@@ -19,13 +19,12 @@ namespace SpikeCore.Modules
         public virtual IEnumerable<string> Triggers => new List<string> {Name};
 
         public IMessageBus MessageBus { protected get; set; }
-        public ModuleConfiguration Configuration { private get; set; }
+        public ModuleConfiguration Configuration { protected get; set; }
         
         public Task HandleMessageAsync(IrcPrivMessage message, CancellationToken cancellationToken)
         {
             return Triggers.Any(trigger =>
-                message.Text.StartsWith(Configuration.TriggerPrefix + trigger,
-                    StringComparison.InvariantCultureIgnoreCase) && AccessAllowed(message.IdentityUser))
+                message.Text.StartsWith(Configuration.TriggerPrefix + trigger, StringComparison.InvariantCultureIgnoreCase) && AccessAllowed(message.IdentityUser))
                 ? HandleMessageAsyncInternal(message, cancellationToken)
                 : Task.CompletedTask;
         }

@@ -71,15 +71,26 @@ namespace SpikeCore.Modules
                     if (null != ipScoreResponse && 
                         (await Task.WhenAny(ipScoreResponse, Task.Delay(2000, cancellationToken)) == ipScoreResponse))
                     {
+                        var statusCode = ipScoreResponse.Result.StatusCode;
+                        
                         // IPIntelligence asks that consumers respect a 429, and try not to call more than 2 queries/sec.
-                        if (ipScoreResponse.Result.StatusCode == HttpStatusCode.TooManyRequests)
+                        if (statusCode == HttpStatusCode.TooManyRequests)
                         {
                             Log.Warning("We've been throttled by IpIntelligence, adding a backoff...");
-                            await Task.Delay(1000, cancellationToken);
-                        }                       
-                        
-                        var ipIntelResult = await ipScoreResponse.Result.Content.ReadAsStringAsync();
-                        result += $" Getipintel.net scores this at {ipIntelResult} ({ParseIpScoreResponse(ipIntelResult)}).";                                              
+                            result += " Getipintel.net has throttled this request. Please wait a few seconds before trying another."; 
+                        }
+
+                        if (ipScoreResponse.Result.IsSuccessStatusCode)
+                        {
+                            var ipIntelResult = await ipScoreResponse.Result.Content.ReadAsStringAsync();
+                            result += $" Getipintel.net scores this at {ipIntelResult} ({ParseIpScoreResponse(ipIntelResult)}).";   
+                        }
+                        else
+                        {
+                            // The API doesn't document any other response codes, but the 500 series always in play when it comes to HTTP...
+                            result += " Getipintel.net lookup has failed, please check the logs.";
+                            Log.Warning("Received a status of {StatusCode} from getipintel.net", statusCode);
+                        }                                                                                              
                     }
 
                     await SendResponse(request, result); 

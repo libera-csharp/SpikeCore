@@ -109,6 +109,10 @@ namespace SpikeCore.Web
                 .SingleInstance();
 
             containerBuilder
+                .RegisterType<LoggingListener>()
+                .SingleInstance();
+
+            containerBuilder
                 .RegisterAssemblyTypes(AppDomain.CurrentDomain.GetAssemblies().Single(assembly => assembly.GetName().Name == "SpikeCore"))
                 .Where(t => t.Name.EndsWith("Module"))
                 .As<IModule>()
@@ -124,6 +128,7 @@ namespace SpikeCore.Web
             
             // We also need to resolve all of our modules.
             container.Resolve<IEnumerable<IModule>>();
+            container.Resolve<LoggingListener>();
 
             return new AutofacServiceProvider(container);
         }

@@ -13,9 +13,9 @@ namespace SpikeCore.Modules
 {
     public class FactoidModule : ModuleBase
     {
-        public override string Name => "factoids";
+        public override string Name => "Factoids";
         public override string Description => "Keeps track of factoids.";
-        public override string Instructions => "factoid <ban|idiot|warn> <message>";
+        public override string Instructions => "<ban|idiot|warn> <message>";
         public override IEnumerable<string> Triggers => new List<string> { "ban", "idiot", "warn" };
 
         private readonly SpikeCoreDbContext _context;

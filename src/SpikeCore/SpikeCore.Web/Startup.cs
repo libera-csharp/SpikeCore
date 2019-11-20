@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 using SpikeCore.Data;
 using SpikeCore.Data.Models;
@@ -72,9 +73,9 @@ namespace SpikeCore.Web
             {
                 services
                     .AddMvc()
-                    .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+                    .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
             }
-            
+
             services.AddHttpClient();
 
             var containerBuilder = new ContainerBuilder();
@@ -84,7 +85,7 @@ namespace SpikeCore.Web
             var ircConnectionConfig = new IrcConnectionConfig();
             Configuration.GetSection("IrcConnection").Bind(ircConnectionConfig);
             containerBuilder.RegisterInstance(ircConnectionConfig);
-            
+
             var moduleConfiguration = new ModuleConfiguration();
             Configuration.GetSection("Modules").Bind(moduleConfiguration);
             containerBuilder.RegisterInstance(moduleConfiguration);
@@ -96,13 +97,13 @@ namespace SpikeCore.Web
                 .RegisterType<IrcConnection>()
                 .As<IIrcConnection>()
                 .SingleInstance();
-            
+
             containerBuilder
                 .RegisterType<IrcClient>()
                 .As<IIrcClient>()
                 .PropertiesAutowired()
                 .SingleInstance();
-            
+
             containerBuilder
                 .RegisterType<SignalRMessageBusConnector>()
                 .As<ISignalRMessageBusConnector>()
@@ -118,14 +119,14 @@ namespace SpikeCore.Web
                 .As<IModule>()
                 .PropertiesAutowired()
                 .SingleInstance();
-            
+
             var container = containerBuilder.Build();
 
             // Grab an instance of IBot so that it gets activated.
             // We don't need to keep hold of it, it's a singleton.
             // Using AutoActivate meant RegisterFoundatio wasn't able to hook Activated before activation.
             container.Resolve<IIrcConnection>();
-            
+
             // We also need to resolve all of our modules.
             container.Resolve<IEnumerable<IModule>>();
             container.Resolve<LoggingListener>();
@@ -133,15 +134,10 @@ namespace SpikeCore.Web
             return new AutofacServiceProvider(container);
         }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (WebConfig.Enabled)
             {
-                app.UseSignalR(routes =>
-                {
-                    routes.MapHub<TestHub>("/hubs/test");
-                });
-
                 if (env.IsDevelopment())
                 {
                     app.UseDeveloperExceptionPage();
@@ -157,15 +153,18 @@ namespace SpikeCore.Web
                 app.UseStaticFiles();
                 app.UseCookiePolicy();
 
-                app.UseAuthentication();
+                app.UseRouting();
 
-                app.UseMvc(routes =>
+                app.UseAuthentication();
+                app.UseAuthorization();
+
+                app.UseEndpoints(endpoints =>
                 {
-                    routes.MapRoute
-                    (
+                    endpoints.MapHub<TestHub>("/hubs/test");
+                    endpoints.MapControllerRoute(
                         name: "default",
-                        template: "{controller=Home}/{action=Index}/{id?}"
-                    );
+                        pattern: "{controller=Home}/{action=Index}/{id?}");
+                    endpoints.MapRazorPages();
                 });
             }
         }

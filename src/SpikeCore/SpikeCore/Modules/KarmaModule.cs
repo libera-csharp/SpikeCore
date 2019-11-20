@@ -33,7 +33,7 @@ namespace SpikeCore.Modules
                 var op = match.Groups[2].Value;
                 
                 var user = _context.Karma
-                               .SingleOrDefault(k => k.Name.Equals(nick, StringComparison.CurrentCultureIgnoreCase)) ?? new KarmaItem { Name = nick, Karma = 0 };
+                               .SingleOrDefault(k => k.Name.ToLower() == nick.ToLower()) ?? new KarmaItem { Name = nick, Karma = 0 };
 
                 // Ignore anyone tweaking their own karma.
                 if (string.IsNullOrEmpty(op) ||!nick.Equals(request.UserName, StringComparison.InvariantCultureIgnoreCase))

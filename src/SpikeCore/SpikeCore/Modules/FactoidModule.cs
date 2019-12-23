@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore.Internal;
 using SpikeCore.Data;
 using SpikeCore.Data.Models;
 using SpikeCore.MessageBus;
@@ -56,31 +55,35 @@ namespace SpikeCore.Modules
                 // Otherwise we're looking up factoids by name/type.
                 else
                 {
-                    // Grab the total count so we can tell users if there's more facts they can't see. They'll have to
-                    // hit the web UI for these.
-                    var count = _context.Factoids
-                        .Count(factoid => FactoidMatches(factoid, command, name));                   
+                    var query = _context.Factoids
+                        .Where(factoid => factoid.Type.ToLower() == command.ToLower() && factoid.Name.ToLower() == name.ToLower());
 
+                    var matchingFactoids = query
+                        .OrderByDescending(factoid => factoid.CreationDate)
+                        .Take(FactDisplayCount)
+                        .ToList();
+
+                    int count = matchingFactoids.Count;
                     if (count > 0)
                     {
-                        var matchingFactoids = _context.Factoids
-                            .Where(factoid => FactoidMatches(factoid, command, name))
-                            .OrderByDescending(factoid => factoid.CreationDate)
-                            .ToList();
-                        
+                        // If we retrieved the limit, check so we can tell users if there's more facts they can't see.
+                        // They'll have to hit the web UI for these.
+                        if (count == FactDisplayCount)
+                        {
+                            count = query.Count();
+                        }
+
                         var pluralization = (count == 1) ? string.Empty : "s";
 
                         var paginationDisplay = (count > FactDisplayCount)
-                            ? $" (showing the first {Math.Min(count, FactDisplayCount)})"
+                            ? $" (showing the first {FactDisplayCount})"
                             : string.Empty;
-                        
+
                         var factoidDisplay = matchingFactoids
-                            .Take(FactDisplayCount)
-                            .Select(x => $"[{x.Description} at {x.CreationDate:MM/dd/yyyy H:mm:ss UTC} by {x.CreatedBy}]")
-                            .Join();
+                            .Select(x => $"[{x.Description} at {x.CreationDate:MM/dd/yyyy H:mm:ss UTC} by {x.CreatedBy}]");
 
                         var response =
-                            $"Found {count} factoid{pluralization} of type {command}{paginationDisplay} for {name}: {factoidDisplay}";
+                            $"Found {count} factoid{pluralization} of type {command}{paginationDisplay} for {name}: {String.Join(", ", factoidDisplay)}";
 
                         await SendResponse(request, response);
                     }
@@ -90,12 +93,6 @@ namespace SpikeCore.Modules
                     }
                 }
             }
-        }
-
-        private static bool FactoidMatches(Factoid factoid, string command, string name)
-        {
-            return factoid.Type.Equals(command, StringComparison.InvariantCultureIgnoreCase) &&
-                   factoid.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase);
         }
 
         private async Task SaveOrUpdate(Factoid factoid, CancellationToken cancellationToken)

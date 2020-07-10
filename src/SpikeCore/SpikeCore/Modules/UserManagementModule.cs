@@ -14,6 +14,8 @@ namespace SpikeCore.Modules
 {
     public class UserManagementModule : ModuleBase
     {
+        private const string IrcLoginProvider = "IrcHost";
+
         private static readonly List<string> RegularRoles = new List<string> {"regular"};
         private static readonly List<string> OpRoles = new List<string> {"regular", "op"};
         private static readonly Regex CommandRegex = new Regex(@"~\S+\s(list|show|add|remove)\s?(.*)?");
@@ -22,7 +24,7 @@ namespace SpikeCore.Modules
         public override string Description => "Provides user management features. Is only available to admins.";
 
         public override string Instructions =>
-            "list | show <username> | add <username> <email> <irc host> <prefix match?> <role> | remove <username>";
+            "list | show <email> | add <email> <irc host> <prefix match?> <role> | remove <email>";
 
         private readonly UserManager<SpikeCoreUser> _userManager;
         private readonly SpikeCoreDbContext _context;
@@ -49,14 +51,13 @@ namespace SpikeCore.Modules
                 var details = commandMatch.Groups[2].Value;
                 var splitDetails = details.Length > 0 ? details.Split(" ") : new string[0];
 
-                // list | show <id> | add <username> <email> <irc host> <match type> <role> | remove <username> 
                 if (command.Equals("list", StringComparison.InvariantCultureIgnoreCase))
                 {
                     await ListUsers(request);
                 }
 
                 // Single argument sub-methods.
-                if (splitDetails.Length > 0)
+                if (splitDetails.Length == 1)
                 {
                     if (command.Equals("show", StringComparison.InvariantCultureIgnoreCase))
                     {
@@ -69,11 +70,10 @@ namespace SpikeCore.Modules
                     }
                 }
 
-                // And this one is really verbose...
-                if (command.Equals("add", StringComparison.InvariantCultureIgnoreCase) && splitDetails.Length > 4)
+                if (command.Equals("add", StringComparison.InvariantCultureIgnoreCase) && splitDetails.Length > 3)
                 {
-                    await CreateUser(request, splitDetails[0], splitDetails[1], splitDetails[2], splitDetails[3],
-                        splitDetails[4], cancellationToken);
+                    await CreateUser(request, splitDetails[0], splitDetails[1], splitDetails[2],
+                        splitDetails[3], cancellationToken);
                 }
             }
         }
@@ -81,17 +81,17 @@ namespace SpikeCore.Modules
         private async Task ListUsers(IrcPrivMessage request)
         {
             var users = string.Join(", ",
-                _userManager.Users.Select(user => $"{user.UserName}"));
+                _userManager.Users.Select(user => $"{user.Email}"));
             await SendResponse(request, $"Users: [{users}]");
         }
 
-        private async Task ShowUser(IrcPrivMessage request, string userName)
+        private async Task ShowUser(IrcPrivMessage request, string email)
         {
-            var user = await _userManager.FindByNameAsync(userName);
+            var user = await _userManager.FindByEmailAsync(email);
 
             if (null == user)
             {
-                await SendResponse(request, $"User {userName} not found.");
+                await SendResponse(request, $"User {email} not found.");
             }
             else
             {
@@ -100,7 +100,7 @@ namespace SpikeCore.Modules
 
                 // Find all applicable user logins. The bot will only create one, but people with physical DB access can add more.
                 var logins = _context.UserLogins.Where(record =>
-                        record.LoginProvider == "IrcHost" && record.UserId == user.Id).Select(record =>
+                        record.LoginProvider == IrcLoginProvider && record.UserId == user.Id).Select(record =>
                         $"[{record.ProviderKey}, match type {(record.MatchType.Length > 0 ? record.MatchType : "Literal")}]")
                     .ToList();
 
@@ -109,35 +109,36 @@ namespace SpikeCore.Modules
             }
         }
 
-        private async Task CreateUser(IrcPrivMessage request, string userName, string email, string ircHostname,
+        private async Task CreateUser(IrcPrivMessage request, string email, string ircHostname,
             string matchType, string role, CancellationToken cancellationToken)
         {
             // If the user already exists, bail.
-            if (null != await _userManager.FindByNameAsync(userName))
+            if (null != await _userManager.FindByEmailAsync(email))
             {
-                await SendResponse(request, $"{userName} already exists, bailing...");
+                await SendResponse(request, $"{email} already exists, bailing...");
             }
             else
             {
                 bool.TryParse(matchType, out var prefixMatch);
 
-                // Create our user.
-                var user = new SpikeCoreUser {UserName = userName, Email = email};
+                // Create our user. Apparently the pre-built identity login methods prefer the username and email to be equal.
+                var user = new SpikeCoreUser {UserName = email, Email = email};
                 await _userManager.CreateAsync(user);
 
                 // Associate the proper roles with the user.
-                var persistedUser = await _userManager.FindByNameAsync(userName);
+                var persistedUser = await _userManager.FindByEmailAsync(email);
                 var roles = role.Equals("op", StringComparison.InvariantCultureIgnoreCase) ? OpRoles : RegularRoles;
                 await _userManager.AddToRolesAsync(persistedUser, roles);
 
                 // Associate a login with the user, so they can use the bot.
-                await _userManager.AddLoginAsync(persistedUser, new UserLoginInfo("IrcHost", ircHostname, userName));
+                await _userManager.AddLoginAsync(persistedUser,
+                    new UserLoginInfo(IrcLoginProvider, ircHostname, email));
 
                 // Prefix match is a custom field, so we'll update it out of band via EF directly.
                 if (prefixMatch)
                 {
                     var login = _context.UserLogins.Single(record =>
-                        record.LoginProvider == "IrcHost" && record.ProviderKey == ircHostname);
+                        record.LoginProvider == IrcLoginProvider && record.ProviderKey == ircHostname);
 
                     login.MatchType = "StartsWith";
 
@@ -146,27 +147,27 @@ namespace SpikeCore.Modules
                 }
 
                 Log.Information("{0} (identity: {1}) has just created user {2}", request.UserName,
-                    request.IdentityUser.UserName, userName);
+                    request.IdentityUser.UserName, email);
                 await SendResponse(request,
-                    $"successfully created user {userName}, with roles [{string.Join(", ", roles)}] (match type: {(prefixMatch ? "StartsWith" : "Literal")})");
+                    $"successfully created user {email}, with roles [{string.Join(", ", roles)}] (match type: {(prefixMatch ? "StartsWith" : "Literal")})");
             }
         }
 
-        private async Task RemoveUser(IrcPrivMessage request, string userName)
+        private async Task RemoveUser(IrcPrivMessage request, string email)
         {
-            var user = await _userManager.FindByNameAsync(userName);
+            var user = await _userManager.FindByEmailAsync(email);
 
             if (null != user)
             {
                 await _userManager.DeleteAsync(user);
-                await SendResponse(request, $"Successfully deleted user {userName}.");
+                await SendResponse(request, $"Successfully deleted user {email}.");
 
                 Log.Information("{0} (identity: {1}) has just deleted user {2} ", request.UserName,
-                    request.IdentityUser.UserName, userName);
+                    request.IdentityUser.UserName, email);
             }
             else
             {
-                await SendResponse(request, $"User {userName} does not exist.");
+                await SendResponse(request, $"User {email} does not exist.");
             }
         }
     }

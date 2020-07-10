@@ -37,7 +37,7 @@ namespace SpikeCore.Modules
 
         protected override bool AccessAllowed(SpikeCoreUser user)
         {
-            return base.AccessAllowed(user) && user.isAdmin();
+            return base.AccessAllowed(user) && user.IsAdmin();
         }
 
         protected override async Task HandleMessageAsyncInternal(IrcPrivMessage request,

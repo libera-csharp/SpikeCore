@@ -81,7 +81,7 @@ namespace SpikeCore.Modules
         private async Task ListUsers(IrcPrivMessage request)
         {
             var users = string.Join(", ",
-                _userManager.Users.Select(user => $"{user.Email}"));
+                _userManager.Users.Select(user => user.Email));
             await SendResponse(request, $"Users: [{users}]");
         }
 
@@ -146,7 +146,7 @@ namespace SpikeCore.Modules
                     await _context.SaveChangesAsync(cancellationToken);
                 }
 
-                Log.Information("{0} (identity: {1}) has just created user {2}", request.UserName,
+                Log.Information("{IrcUserName} (identity: {IdentityUserName}) has just created user {AffectedUserName}", request.UserName,
                     request.IdentityUser.UserName, email);
                 await SendResponse(request,
                     $"successfully created user {email}, with roles [{string.Join(", ", roles)}] (match type: {(prefixMatch ? "StartsWith" : "Literal")})");
@@ -162,7 +162,7 @@ namespace SpikeCore.Modules
                 await _userManager.DeleteAsync(user);
                 await SendResponse(request, $"Successfully deleted user {email}.");
 
-                Log.Information("{0} (identity: {1}) has just deleted user {2} ", request.UserName,
+                Log.Information("{IrcUserName} (identity: {IdentityUserName}) has just deleted user {AffectedUserName} ", request.UserName,
                     request.IdentityUser.UserName, email);
             }
             else

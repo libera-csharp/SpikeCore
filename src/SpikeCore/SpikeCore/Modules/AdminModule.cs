@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,7 +21,7 @@ namespace SpikeCore.Modules
 
         protected override bool AccessAllowed(SpikeCoreUser user)
         {
-            return base.AccessAllowed(user) && user.Roles.Any(x => x.Equals("Admin", StringComparison.InvariantCultureIgnoreCase));
+            return base.AccessAllowed(user) && user.IsAdmin();
         }
 
         protected override Task HandleMessageAsyncInternal(IrcPrivMessage request, CancellationToken cancellationToken)

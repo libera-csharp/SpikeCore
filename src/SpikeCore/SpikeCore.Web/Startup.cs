@@ -25,6 +25,7 @@ using SpikeCore.Modules;
 using SpikeCore.Web.Configuration;
 using SpikeCore.Web.Hubs;
 using SpikeCore.Web.Services;
+using SpikeCore.Web.TokenProviders;
 
 namespace SpikeCore.Web
 {
@@ -67,6 +68,8 @@ namespace SpikeCore.Web
                 })
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<SpikeCoreDbContext>()
+                .AddDefaultTokenProviders()
+                .AddPasswordlessLoginTokenProvider()
                 .AddUserStore<SpikeCoreUserStore>();
 
             if (WebConfig.Enabled)

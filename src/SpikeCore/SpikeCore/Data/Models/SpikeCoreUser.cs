@@ -10,7 +10,7 @@ namespace SpikeCore.Data.Models
     {
         [NotMapped] public IEnumerable<string> Roles { get; set; }
 
-        public bool isAdmin()
+        public bool IsAdmin()
         {
             return Roles.Any(x => x.Equals("Admin", StringComparison.InvariantCultureIgnoreCase));
         }

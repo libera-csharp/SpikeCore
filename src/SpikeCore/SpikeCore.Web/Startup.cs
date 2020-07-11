@@ -25,6 +25,7 @@ using SpikeCore.Modules;
 using SpikeCore.Web.Configuration;
 using SpikeCore.Web.Hubs;
 using SpikeCore.Web.Services;
+using SpikeCore.Web.TokenProviders;
 
 namespace SpikeCore.Web
 {
@@ -67,6 +68,8 @@ namespace SpikeCore.Web
                 })
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<SpikeCoreDbContext>()
+                .AddDefaultTokenProviders()
+                .AddPasswordlessLoginTokenProvider()
                 .AddUserStore<SpikeCoreUserStore>();
 
             if (WebConfig.Enabled)
@@ -92,6 +95,14 @@ namespace SpikeCore.Web
 
             containerBuilder
                 .RegisterFoundatio();
+            
+            // Register this as a singleton so both our modules and ASP.NET infrastructure get the same instance.
+            // Removing this causes our modules and controllers to get different instances of a UserManager, which, 
+            // due to EF means that making updates via one is not available to the other.
+            containerBuilder.RegisterType<UserManager<SpikeCoreUser>>()
+                .As<UserManager<SpikeCoreUser>>()
+                .PropertiesAutowired()
+                .SingleInstance();
 
             containerBuilder
                 .RegisterType<IrcConnection>()

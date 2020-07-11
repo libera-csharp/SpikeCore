@@ -1,8 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
-using System.Security.Claims;
+﻿using System.Diagnostics;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using SpikeCore.Data.Models;
@@ -13,17 +10,20 @@ namespace SpikeCore.Web.Controllers
 {
     /// <summary>
     /// Provides a controller for authenticating users via validating tokens issued by the 
-    /// <see cref="PasswordlessLoginTokenProvider{TUser}"/>.
+    /// <see cref="PasswordlessLoginTokenProvider"/>.
     ///
     /// This is based on https://www.scottbrady91.com/ASPNET-Identity/Implementing-Mediums-Passwordless-Authentication-using-ASPNET-Core-Identity.
     /// </summary>
     public class AuthenticationController : Controller
     {
         private readonly UserManager<SpikeCoreUser> _userManager;
+        private readonly SignInManager<SpikeCoreUser> _signInManager;
 
-        public AuthenticationController(UserManager<SpikeCoreUser> userManager)
+        public AuthenticationController(UserManager<SpikeCoreUser> userManager,
+            SignInManager<SpikeCoreUser> signInManager)
         {
             _userManager = userManager;
+            _signInManager = signInManager;
         }
 
         [HttpGet]
@@ -32,7 +32,8 @@ namespace SpikeCore.Web.Controllers
             var user = await _userManager.FindByEmailAsync(email);
 
             var isValid =
-                await _userManager.VerifyUserTokenAsync(user, "PasswordlessLoginProvider", "passwordless-auth", token);
+                await _userManager.VerifyUserTokenAsync(user, nameof(PasswordlessLoginTokenProvider),
+                    PasswordlessLoginTokenProvider.AuthType, token);
 
             if (isValid)
             {
@@ -40,13 +41,7 @@ namespace SpikeCore.Web.Controllers
                 // contain the security stamp that was used to generate them.
                 await _userManager.UpdateSecurityStampAsync(user);
 
-                await HttpContext.SignInAsync(
-                    IdentityConstants.ApplicationScheme,
-                    new ClaimsPrincipal(
-                        new ClaimsIdentity(new List<Claim> {new Claim("sub", user.Id)},
-                            IdentityConstants.ApplicationScheme)
-                    ));
-
+                await _signInManager.SignInAsync(user, true);
                 return RedirectToAction("Index", "Home");
             }
 

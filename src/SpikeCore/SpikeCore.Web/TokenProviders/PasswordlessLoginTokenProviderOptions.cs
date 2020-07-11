@@ -7,7 +7,7 @@ namespace SpikeCore.Web.TokenProviders
     {
         public PasswordlessLoginTokenProviderOptions()
         {
-            Name = "PasswordlessLoginProvider";
+            Name = nameof(PasswordlessLoginTokenProvider);
             TokenLifespan = TimeSpan.FromMinutes(10);
         }
     }

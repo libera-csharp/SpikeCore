@@ -23,7 +23,8 @@ namespace SpikeCore.Modules
         protected override async Task HandleMessageAsyncInternal(IrcPrivMessage request,
             CancellationToken cancellationToken)
         {
-            var token = HttpUtility.UrlEncode(await _userManager.GenerateUserTokenAsync(request.IdentityUser, "PasswordlessLoginProvider",
+            var token = HttpUtility.UrlEncode(await _userManager.GenerateUserTokenAsync(request.IdentityUser,
+                "PasswordlessLoginTokenProvider",
                 "passwordless-auth"));
 
             await SendMessageToNick(request.UserName,

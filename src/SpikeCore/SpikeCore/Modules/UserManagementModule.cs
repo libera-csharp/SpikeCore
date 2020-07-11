@@ -24,7 +24,7 @@ namespace SpikeCore.Modules
         public override string Description => "Provides user management features. Is only available to admins.";
 
         public override string Instructions =>
-            "list | show <email> | add <email> <irc host> <prefix match?> <role> | remove <email>";
+            "list | show <email> | add <nick> <email> <irc host> <prefix match?> <role> | remove <email>";
 
         private readonly UserManager<SpikeCoreUser> _userManager;
         private readonly SpikeCoreDbContext _context;
@@ -70,10 +70,10 @@ namespace SpikeCore.Modules
                     }
                 }
 
-                if (command.Equals("add", StringComparison.InvariantCultureIgnoreCase) && splitDetails.Length > 3)
+                if (command.Equals("add", StringComparison.InvariantCultureIgnoreCase) && splitDetails.Length > 4)
                 {
-                    await CreateUser(request, splitDetails[0], splitDetails[1], splitDetails[2],
-                        splitDetails[3], cancellationToken);
+                    await CreateUser(request, splitDetails[0], splitDetails[1], splitDetails[2], splitDetails[3],
+                        splitDetails[4], cancellationToken);
                 }
             }
         }
@@ -101,7 +101,7 @@ namespace SpikeCore.Modules
                 // Find all applicable user logins. The bot will only create one, but people with physical DB access can add more.
                 var logins = _context.UserLogins.Where(record =>
                         record.LoginProvider == IrcLoginProvider && record.UserId == user.Id).Select(record =>
-                        $"[{record.ProviderKey}, match type {(record.MatchType.Length > 0 ? record.MatchType : "Literal")}]")
+                        $"[{record.ProviderDisplayName}: {record.ProviderKey}, match type {(record.MatchType.Length > 0 ? record.MatchType : "Literal")}]")
                     .ToList();
 
                 await SendResponse(request,
@@ -109,7 +109,7 @@ namespace SpikeCore.Modules
             }
         }
 
-        private async Task CreateUser(IrcPrivMessage request, string email, string ircHostname,
+        private async Task CreateUser(IrcPrivMessage request, string nickname, string email, string ircHostname,
             string matchType, string role, CancellationToken cancellationToken)
         {
             // If the user already exists, bail.
@@ -132,7 +132,7 @@ namespace SpikeCore.Modules
 
                 // Associate a login with the user, so they can use the bot.
                 await _userManager.AddLoginAsync(persistedUser,
-                    new UserLoginInfo(IrcLoginProvider, ircHostname, email));
+                    new UserLoginInfo(IrcLoginProvider, ircHostname, nickname));
 
                 // Prefix match is a custom field, so we'll update it out of band via EF directly.
                 if (prefixMatch)
@@ -149,7 +149,7 @@ namespace SpikeCore.Modules
                 Log.Information("{IrcUserName} (identity: {IdentityUserName}) has just created user {AffectedUserName}", request.UserName,
                     request.IdentityUser.UserName, email);
                 await SendResponse(request,
-                    $"successfully created user {email}, with roles [{string.Join(", ", roles)}] (match type: {(prefixMatch ? "StartsWith" : "Literal")})");
+                    $"successfully created user {nickname} (email: {email}), with roles [{string.Join(", ", roles)}] (match type: {(prefixMatch ? "StartsWith" : "Literal")})");
             }
         }
 

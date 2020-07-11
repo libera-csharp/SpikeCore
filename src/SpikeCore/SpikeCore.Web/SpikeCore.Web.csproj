@@ -29,4 +29,8 @@
     <ProjectReference Include="..\SpikeCore\SpikeCore.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Views\Authentication" />
+  </ItemGroup>
+
 </Project>

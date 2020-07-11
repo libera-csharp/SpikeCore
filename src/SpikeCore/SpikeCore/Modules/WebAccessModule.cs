@@ -1,5 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 using Microsoft.AspNetCore.Identity;
 using SpikeCore.Data.Models;
 using SpikeCore.MessageBus;
@@ -22,11 +23,11 @@ namespace SpikeCore.Modules
         protected override async Task HandleMessageAsyncInternal(IrcPrivMessage request,
             CancellationToken cancellationToken)
         {
-            var token = await _userManager.GenerateUserTokenAsync(request.IdentityUser, "PasswordlessLoginProvider",
-                "passwordless-auth");
+            var token = HttpUtility.UrlEncode(await _userManager.GenerateUserTokenAsync(request.IdentityUser, "PasswordlessLoginProvider",
+                "passwordless-auth"));
 
             await SendMessageToNick(request.UserName,
-                $"{Configuration.WebAccessHost}/Identity/Account/Login?token={token}");
+                $"{Configuration.WebAccessHost}/Authentication/TokenCallback?email={request.IdentityUser.Email}&token={token}");
         }
     }
 }

@@ -183,13 +183,19 @@ namespace SpikeCore.Web
                     endpoints.MapRazorPages();
 
                     // Disable registration - user management only happens via the bot.
-                    endpoints.MapGet("/Identity/Account/Register",
-                        context => Task.Factory.StartNew(() =>
-                            context.Response.Redirect("/Identity/Account/AccessDenied", true, true)));
+                    endpoints.MapGet("/Identity/Account/Register", context =>
+                        {
+                            context.Response.Redirect("/Identity/Account/AccessDenied", true, true);
+                            return Task.CompletedTask;
+                        }
+                    );
 
-                    endpoints.MapPost("/Identity/Account/Register",
-                        context => Task.Factory.StartNew(() =>
-                            context.Response.Redirect("/Identity/Account/AccessDenied", true, true)));
+                    endpoints.MapPost("/Identity/Account/Register", context =>
+                        {
+                            context.Response.Redirect("/Identity/Account/AccessDenied", true, true);
+                            return Task.CompletedTask;
+                        }
+                    );
                 });
             }
         }

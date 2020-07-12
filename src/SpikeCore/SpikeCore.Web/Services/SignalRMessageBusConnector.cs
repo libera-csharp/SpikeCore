@@ -12,10 +12,10 @@ namespace SpikeCore.Web.Services
 {
     public class SignalRMessageBusConnector : ISignalRMessageBusConnector, IMessageHandler<IrcReceiveMessage>
     {
-        private readonly IHubContext<TestHub> _hubContext;
+        private readonly IHubContext<BotConsoleHub> _hubContext;
         private readonly IMessageBus _messageBus;
 
-        public SignalRMessageBusConnector(IHubContext<TestHub> hubContext, IMessageBus messageBus)
+        public SignalRMessageBusConnector(IHubContext<BotConsoleHub> hubContext, IMessageBus messageBus)
         {
             _hubContext = hubContext;
             _messageBus = messageBus;
@@ -25,8 +25,8 @@ namespace SpikeCore.Web.Services
             => await _hubContext.Clients.All.SendAsync("ReceiveMessage", message.Message, cancellationToken);
 
         // This should be "string channelName, string message" but UI work is being punted
-        // until the React intergration.
-        public async Task SendMessageAsync(string message)
-            => await _messageBus.PublishAsync(new IrcSendChannelMessage("#spikelite", message));
+        // until the React integration.
+        public async Task SendMessageAsync(string channelName, string message)
+            => await _messageBus.PublishAsync(new IrcSendChannelMessage(channelName, message));
     }
 }

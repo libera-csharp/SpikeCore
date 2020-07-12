@@ -4,6 +4,6 @@ namespace SpikeCore.Web.Services
 {
     public interface ISignalRMessageBusConnector
     {
-        Task SendMessageAsync(string message);
+        Task SendMessageAsync(string channelName, string message);
     }
 }

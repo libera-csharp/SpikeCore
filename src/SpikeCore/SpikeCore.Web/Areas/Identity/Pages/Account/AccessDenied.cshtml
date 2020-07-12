@@ -4,7 +4,10 @@
     ViewData["Title"] = "Access denied";
 }
 
-<header>
-    <h1 class="text-danger">@ViewData["Title"]</h1>
+<div class="pageContainer">
+    <partial name="_Navbar"/>
+
+    <h2><br/></h2>
+    <h3 class="text-danger">@ViewData["Title"]</h3>
     <p class="text-danger">You do not have access to this resource.</p>
-</header>
+</div>

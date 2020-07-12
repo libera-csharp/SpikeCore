@@ -1,16 +1,19 @@
 ﻿"use strict";
 
-var connection = new signalR
+const connection = new signalR
     .HubConnectionBuilder()
-    .withUrl("/hubs/test")
+    .withUrl("/hubs/bot-console")
     .build();
 
-var sendMessage = function () {
-    var messageInput = document.getElementById("messageInput");
-    var message = messageInput.value;
+const sendMessage = function () {
+    const messageInput = document.getElementById("messageInput");
+    const message = messageInput.value;
     messageInput.value = "";
+    
+    const channelTarget = document.getElementById("channelTarget");
+    const channel = channelTarget[channelTarget.selectedIndex].value;
 
-    connection.invoke("SendMessage", message).catch(function (err) {
+    connection.invoke("SendMessage", channel, message).catch(function (err) {
         return console.error(err.toString());
     });
 };
@@ -21,13 +24,13 @@ connection.on("ReceiveMessage", function (message) {
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;");
 
-    var li = document.createElement("li");
+    const li = document.createElement("li");
     li.textContent = message;
 
-    var messageList = document.getElementById("messagesList");
+    const messageList = document.getElementById("messagesList");
     messageList.appendChild(li);
 
-    var messageListContainer = document.getElementById("messagesListContainer");
+    const messageListContainer = document.getElementById("messagesListContainer");
     messageListContainer.scrollTop = messageListContainer.scrollHeight;
 });
 

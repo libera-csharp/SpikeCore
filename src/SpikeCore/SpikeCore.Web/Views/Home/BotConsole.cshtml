@@ -1,0 +1,35 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using SpikeCore.Data.Models
+
+@inject SignInManager<SpikeCoreUser> SignInManager
+
+@{
+    ViewData["Title"] = "SpikeCore Console";
+}
+
+<div class="pageContainer">
+
+    <partial name="_Navbar"/>
+
+    <h2>
+        <br/>
+    </h2>
+
+    <div id="messagesListContainer" class="messageListContainer">
+        <ul id="messagesList"></ul>
+    </div>
+
+    <div class="sendMessageContainer">
+        <input type="text" id="messageInput" class="sendMessageTextBox" placeholder="Message to send..."/>
+        <select id="channelTarget">
+            <option value="#spikelite">#spikelite</option>
+            <option value="##csharp">##csharp</option>
+        </select>
+        <input type="button" id="sendButton" value="Send"/>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/lib/signalr/signalr.js"></script>
+    <script src="~/clientapp/BotConsole.js"></script>
+}

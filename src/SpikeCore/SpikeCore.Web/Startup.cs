@@ -7,12 +7,14 @@ using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Serilog;
 using SpikeCore.Data;
 using SpikeCore.Data.Models;
 using SpikeCore.Irc;
@@ -48,6 +50,11 @@ namespace SpikeCore.Web
                 {
                     options.CheckConsentNeeded = context => true;
                     options.MinimumSameSitePolicy = SameSiteMode.None;
+                });
+
+                services.Configure<ForwardedHeadersOptions>(options =>
+                {
+                    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
                 });
             }
 
@@ -130,7 +137,7 @@ namespace SpikeCore.Web
                 .SingleInstance();
 
             containerBuilder
-                .RegisterAssemblyTypes(AppDomain.CurrentDomain.GetAssemblies().Single(assembly => assembly.GetName().Name == "SpikeCore"))
+                .RegisterAssemblyTypes(typeof(IModule).Assembly)
                 .Where(t => t.Name.EndsWith("Module"))
                 .As<IModule>()
                 .PropertiesAutowired()
@@ -163,6 +170,17 @@ namespace SpikeCore.Web
                 {
                     app.UseExceptionHandler("/Home/Error");
                     app.UseHsts();
+                }
+
+                if (!string.IsNullOrEmpty(WebConfig.PathBase))
+                {
+                    // If our proxy trims the path, configure our requests appropriately.
+                    Log.Information("Setting the PathBase to {PathBase}", WebConfig.PathBase);
+                    app.Use((context, next) =>
+                    {
+                        context.Request.PathBase = new PathString(WebConfig.PathBase);
+                        return next();
+                    });
                 }
 
                 app.UseHttpsRedirection();

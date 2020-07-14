@@ -137,8 +137,7 @@ namespace SpikeCore.Web
                 .SingleInstance();
 
             containerBuilder
-                .RegisterAssemblyTypes(AppDomain.CurrentDomain.GetAssemblies()
-                    .Single(assembly => assembly.GetName().Name == "SpikeCore"))
+                .RegisterAssemblyTypes(typeof(IModule).Assembly)
                 .Where(t => t.Name.EndsWith("Module"))
                 .As<IModule>()
                 .PropertiesAutowired()

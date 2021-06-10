@@ -56,6 +56,8 @@ namespace SpikeCore.Web
                 {
                     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
                 });
+                
+                services.AddDatabaseDeveloperPageExceptionFilter();
             }
 
             services.AddDbContext<SpikeCoreDbContext>(options =>
@@ -164,7 +166,7 @@ namespace SpikeCore.Web
                 if (env.IsDevelopment())
                 {
                     app.UseDeveloperExceptionPage();
-                    app.UseDatabaseErrorPage();
+                    app.UseMigrationsEndPoint();
                 }
                 else
                 {

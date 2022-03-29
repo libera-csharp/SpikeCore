@@ -23,7 +23,7 @@ namespace SpikeCore.MessageBus.Foundatio.AutofacIntegration
 
             var subscribeAsyncMethodInfo = typeof(IMessageSubscriber)
                 .GetMethods()
-                .Single(methodInfo => methodInfo.Name == "SubscribeAsync");
+                .Single(methodInfo => methodInfo.Name == nameof(IMessageSubscriber.SubscribeAsync));
 
             self.RegisterBuildCallback(container =>
             {
@@ -55,7 +55,7 @@ namespace SpikeCore.MessageBus.Foundatio.AutofacIntegration
                                 var messageType = iMessageHandlerType.GetGenericArguments().Single();
 
                                 // Get the handle method for the message type
-                                var handleMessageAsyncMethodInfo = iMessageHandlerType.GetMethod("HandleMessageAsync", new[] { messageType, typeof(CancellationToken) });
+                                var handleMessageAsyncMethodInfo = iMessageHandlerType.GetMethod(nameof(IMessageHandler<object>.HandleMessageAsync), new[] { messageType, typeof(CancellationToken) });
 
                                 // Create a delegate which satisfies SubscribeAsync, and calls the handle method
                                 var messageHandlerParameter = Expression.Parameter(iMessageHandlerType);

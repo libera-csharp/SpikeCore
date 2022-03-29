@@ -1,44 +1,32 @@
 ﻿using System;
-using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-
-using Microsoft.AspNetCore;
+using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Serilog;
+using Serilog.Events;
 using SpikeCore.Domain;
 
 namespace SpikeCore.Web
 {
     public class Program
-    {
-        private static IConfiguration Configuration { get; } = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile(path: "appsettings.json", optional: true, reloadOnChange: true)
-            .AddEnvironmentVariables()
-            .Build();
-        
+    {        
         public static async Task Main(string[] args)
         {
             var cancellationTokenSource = new CancellationTokenSource();
             var tokenHolder = new WebHostCancellationTokenHolder(cancellationTokenSource);
-            
+
             Log.Logger = new LoggerConfiguration()
-                .ReadFrom.Configuration(Configuration)
+                .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+                .Enrich.FromLogContext()
                 .Enrich.WithProperty("App Name", "SpikeCore")
-                .CreateLogger();
+                .WriteTo.Console()
+                .CreateBootstrapLogger();
 
             try
             {
-                var webHost = WebHost
-                    .CreateDefaultBuilder(args)
-                    .ConfigureServices(servicesCollection => { servicesCollection.AddSingleton(tokenHolder); })
-                    .UseStartup<Startup>()
-                    .UseSerilog()
-                    .Build();
-
                 Console.CancelKeyPress += (sender, eventArgs) =>
                 {
                     eventArgs.Cancel = true;
@@ -49,7 +37,7 @@ namespace SpikeCore.Web
 
                 Log.Information("Running, press CTRL-C to stop the bot.");
 
-                await webHost.RunAsync(cancellationTokenSource.Token);
+                await CreateHostBuilder(args).ConfigureServices(servicesCollection => { servicesCollection.AddSingleton(tokenHolder); }).Build().RunAsync(cancellationTokenSource.Token);
                 Log.Information("The bot has successfully stopped.");
             }
             finally
@@ -57,5 +45,18 @@ namespace SpikeCore.Web
                 Log.CloseAndFlush();                
             }            
         }
+
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .UseServiceProviderFactory(new AutofacServiceProviderFactory())
+                .UseSerilog((context, services, configuration) => configuration
+                    .ReadFrom.Configuration(context.Configuration)
+                    .ReadFrom.Services(services)
+                    .Enrich.FromLogContext()
+                    .Enrich.WithProperty("App Name", "SpikeCore"))
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>();
+                });
     }
 }

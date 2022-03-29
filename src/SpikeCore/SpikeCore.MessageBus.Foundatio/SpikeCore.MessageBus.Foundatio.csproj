@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Autofac" Version="4.8.1" />
-    <PackageReference Include="Foundatio" Version="7.1.1845" />
+    <PackageReference Include="Autofac" Version="5.*" />
+    <PackageReference Include="Foundatio" Version="10.4.0" />
   </ItemGroup>
 
   <ItemGroup>

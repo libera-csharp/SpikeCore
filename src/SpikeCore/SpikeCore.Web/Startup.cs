@@ -40,7 +40,7 @@ namespace SpikeCore.Web
             Configuration.GetSection("Web").Bind(WebConfig);
         }
 
-        public IServiceProvider ConfigureServices(IServiceCollection services)
+        public void ConfigureServices(IServiceCollection services)
         {
             if (WebConfig.Enabled)
             {
@@ -82,8 +82,7 @@ namespace SpikeCore.Web
             if (WebConfig.Enabled)
             {
                 services
-                    .AddMvc()
-                    .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+                    .AddControllersWithViews();
 
                 services.ConfigureApplicationCookie(options =>
                 {
@@ -94,10 +93,17 @@ namespace SpikeCore.Web
             }
 
             services.AddHttpClient();
+        }
 
-            var containerBuilder = new ContainerBuilder();
-
-            containerBuilder.Populate(services);
+        // ConfigureContainer is where you can register things directly
+        // with Autofac. This runs after ConfigureServices so the things
+        // here will override registrations made in ConfigureServices.
+        // Don't build the container; that gets done for you by the factory.
+        public void ConfigureContainer(ContainerBuilder containerBuilder)
+        {
+            // Register your own things directly with Autofac here. Don't
+            // call builder.Populate(), that happens in AutofacServiceProviderFactory
+            // for you.
 
             var ircConnectionConfig = new IrcConnectionConfig();
             Configuration.GetSection("IrcConnection").Bind(ircConnectionConfig);
@@ -145,7 +151,11 @@ namespace SpikeCore.Web
                 .PropertiesAutowired()
                 .SingleInstance();
 
-            var container = containerBuilder.Build();
+        }
+
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        {
+            var container = app.ApplicationServices.GetAutofacRoot();
 
             // Grab an instance of IBot so that it gets activated.
             // We don't need to keep hold of it, it's a singleton.
@@ -156,11 +166,6 @@ namespace SpikeCore.Web
             container.Resolve<IEnumerable<IModule>>();
             container.Resolve<LoggingListener>();
 
-            return new AutofacServiceProvider(container);
-        }
-
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-        {
             if (WebConfig.Enabled)
             {
                 if (env.IsDevelopment())
